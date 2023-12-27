@@ -2,6 +2,7 @@
 const router = require("express").Router()
 const client = require('../../psql')
 const exception = require('../modules/exception')
+const duplicate = require('../modules/duplicateCheck')
 
 //Apis
 //회원가입 & 아이디/이메일 중복체크
@@ -14,42 +15,40 @@ router.post("/", async (req, res) => {
         "data": null
     }
     try {
+        //정규식 체크
         exception.idCheck(id)
         exception.pwCheck(pw)
         exception.nameCheck(name)
         exception.emailCheck(email)
 
-        //아이디 중복체크
-        const idCheckSql = "SELECT * FROM account WHERE id=$1" //물음표 여러개면 $1, $2, $3
-        const idValues = [id]
-        const idData = await client.query(idCheckSql, idValues)
+        //중복체크
+        duplicate.idCheck(id)
+        duplicate.emailCheck(email)
 
-        if (idData.rows.length > 0) {
-            signUpResult.message = "아이디가 이미 존재합니다."
-            return res.send(signUpResult); // 중복 아이디인 경우 바로 응답을 보내고 함수 종료
+        const idDuplicateMessage = await duplicate.idCheck(id);
+        const emailDuplicateMessage = await duplicate.emailCheck(email);
+
+        if (idDuplicateMessage) {
+            signUpResult.message = idDuplicateMessage;
+            return res.send(signUpResult);
         }
 
-        //이메일 중복체크
-            const emailCheckSql = "SELECT * FROM account WHERE email=$1" //물음표 여러개면 $1, $2, $3
-            const emailValues = [email]
-            const emailData = await client.query(emailCheckSql, emailValues)
-
-        if (emailData.rows.length > 0) {
-            signUpResult.message = "이메일이 이미 존재합니다."
-            return res.send(signUpResult); // 중복 아이디인 경우 바로 응답을 보내고 함수 종료
+        if (emailDuplicateMessage) {
+            signUpResult.message = emailDuplicateMessage;
+            return res.send(signUpResult);
         }
 
         //아이디/이메일 중복이 아닌 경우 회원가입
-        const signUpSql = "INSERT INTO account (id, pw, name, email) VALUES ($1, $2, $3, $4)" //물음표 여러개면 $1, $2, $3
-        const signUpValues = [id, pw, name, email]
-        const signUpData = await client.query(signUpSql, signUpValues)
+        const sql = "INSERT INTO account (id, pw, name, email) VALUES ($1, $2, $3, $4)" //물음표 여러개면 $1, $2, $3
+        const values = [id, pw, name, email]
+        const data = await client.query(sql, values)
 
         signUpResult.success = true
         signUpResult.message = "회원가입에 성공했습니다."
         res.send(signUpResult)
     }
     catch (e) {
-        signUpResult.message = e
+        signUpResult.message = e.message
         res.send(signUpResult)
     }
     finally {
@@ -109,13 +108,12 @@ router.get("/logout", async (req, res) => {
     }
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.")
-        req.session.destroy((err) => {
+        await req.session.destroy(() => {
             if (err) return res.send(logOutResult)
-        
+
             res.clearCookie('connect.sid')  // 세션 쿠키 삭제
             logOutResult.success = true
             res.send(logOutResult)
-        
         })
     }
     catch (e) {
@@ -123,5 +121,70 @@ router.get("/logout", async (req, res) => {
         res.status(400).send(logOutResult)
     }
 })
+
+//내정보 보기
+router.get("/info", (req, res) => {
+    const infoResult = {
+        "success": false,
+        "message": "",
+        "data": null
+    }
+    try {
+        if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.")
+        const { id, pw, name, email } = req.session.user
+        infoResult.success = true
+        infoResult.data = {id, pw, name, email}
+        res.send(infoResult)
+    }
+    catch (e) {
+        infoResult.message = e.message
+        res.status(400).send(infoResult)
+    }
+})
+
+//내정보 수정
+router.put("/info", async (req, res) => {
+    const {pw, name, email} = req.body
+    const editInfoResult = {
+        "success": false,
+        "message": ""
+    }
+    try {
+        if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.");
+        const idx = req.session.user.idx
+        const currentemail = req.session.user.email
+        exception.pwCheck(pw)
+        exception.nameCheck(name)
+        exception.emailCheck(email)
+        //이메일 중복체크
+        //이메일이 바뀌었을 때만 실행
+        if (currentemail !== email) {
+            duplicate.emailCheck(email)
+            updateInfoEvent()
+        }
+        else updateInfoEvent()
+        
+        //정보 수정
+        //바뀐사항 있을 때만 실행하도록 하자 (12/27)
+        const updateInfoEvent = () => {
+            conn.query('UPDATE account SET pw=?, name=?, email=? WHERE idx=?', [pw, name, email, idx], (err) => {
+            if (err) return res.send(editInfoResult)
+            req.session.user = {
+                pw: pw,
+                name: name,
+                email: email
+            }
+            editInfoResult.success = true 
+            editInfoResult.message = "정보수정이 완료되었습니다."
+            res.send(editInfoResult)
+            })
+        }
+    }
+    catch (e) {
+        editInfoResult.message = e.message
+        res.status(400).send(editInfoResult)
+    }
+})
+
 
 module.exports = router

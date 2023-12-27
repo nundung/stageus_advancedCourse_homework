@@ -1,5 +1,5 @@
 // import 
-const exception = {};
+const exception = {}
 
 exception.idCheck = (id) => {
     if(id === null || id === "" || id === undefined) throw new Error("아이디 값이 이상해요")
