@@ -29,13 +29,15 @@ router.post("/", async (req, res) => {
         const emailDuplicateMessage = await duplicate.emailCheck(email);
 
         if (idDuplicateMessage) {
-            signUpResult.message = idDuplicateMessage;
-            return res.send(signUpResult);
+            // signUpResult.message = idDuplicateMessage;
+            // return res.send(signUpResult);
+            throw new Error(idDuplicateMessage)
         }
 
         if (emailDuplicateMessage) {
-            signUpResult.message = emailDuplicateMessage;
-            return res.send(signUpResult);
+            // signUpResult.message = emailDuplicateMessage;
+            // return res.send(signUpResult);
+            throw new Error(emailDuplicateMessage)
         }
 
         //아이디/이메일 중복이 아닌 경우 회원가입
@@ -45,14 +47,15 @@ router.post("/", async (req, res) => {
 
         signUpResult.success = true
         signUpResult.message = "회원가입에 성공했습니다."
-        res.send(signUpResult)
+        // res.send(signUpResult)
     }
     catch (e) {
         signUpResult.message = e.message
-        res.send(signUpResult)
+        // res.send(signUpResult)
     }
     finally {
-        if(client) client.end()      //끊어주지 않으면 언젠가 막힘 1000개까지 접속이 가능하기 때문에 1000개가 넘어가는 순간 막힘
+        if(client) client.end()      //끊어주지 않으면 언젠가 막힘 최대 접속 가능 개수를 넘으면 막힘 1000개까지 접속이 가능하기 때문에 1000개가 넘어가는 순간 막힘
+        res.send(signUpResult)
     }
 })
 
@@ -93,7 +96,7 @@ router.post("/login", async (req, res) => {
     }
     catch (e) {
         logInResult.message = e.message
-        res.status(400).send(logInResult)
+        res.send(logInResult)
     }
     finally {
         if(client) client.end()      //끊어주지 않으면 언젠가 막힘 1000개까지 접속이 가능하기 때문에 1000개가 넘어가는 순간 막힘
@@ -118,7 +121,7 @@ router.get("/logout", async (req, res) => {
     }
     catch (e) {
         logOutResult.message = e.message
-        res.status(400).send(logOutResult)
+        res.send(logOutResult)
     }
 })
 
@@ -138,7 +141,7 @@ router.get("/info", (req, res) => {
     }
     catch (e) {
         infoResult.message = e.message
-        res.status(400).send(infoResult)
+        res.send(infoResult)
     }
 })
 
@@ -182,7 +185,7 @@ router.put("/info", async (req, res) => {
     }
     catch (e) {
         editInfoResult.message = e.message
-        res.status(400).send(editInfoResult)
+        res.send(editInfoResult)
     }
 })
 
