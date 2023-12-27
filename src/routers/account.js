@@ -57,5 +57,71 @@ router.post("/", async (req, res) => {
     }
 })
 
+//로그인
+router.post("/login", async (req, res) => {
+    const {id, pw} = req.body
+    const logInResult = {
+        "success": false,
+        "message": ""
+    }
+    try {
+        if (req.session.user) throw new Error("이미 로그인 되어있습니다.")
+
+        exception.idCheck(id)
+        exception.pwCheck(pw)
+
+        //db값 불러오기
+        const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2" //물음표 여러개면 $1, $2, $3
+        const values = [id, pw]
+        const data = await client.query(sql, values)
+
+        if (data.rows.length === 0) {
+            // 로그인 실패: 해당 아이디와 비밀번호로 계정을 찾을 수 없음
+            logInResult.message = "아이디 또는 비밀번호가 올바르지 않습니다."
+            return res.send(logInResult)
+        }
+        
+        // 로그인 성공
+        req.session.user = {
+            idx: data.rows[0].idx,
+            id: data.rows[0].id,
+            pw: data.rows[0].pw,
+            name: data.rows[0].name,
+            email: data.rows[0].email
+        }
+        logInResult.success = true
+        res.send(logInResult)
+    }
+    catch (e) {
+        logInResult.message = e.message
+        res.status(400).send(logInResult)
+    }
+    finally {
+        if(client) client.end()      //끊어주지 않으면 언젠가 막힘 1000개까지 접속이 가능하기 때문에 1000개가 넘어가는 순간 막힘
+    }
+})
+
+//로그아웃
+router.get("/logout", async (req, res) => {
+    const logOutResult = {
+        "success": false,
+        "message": ""
+    }
+    try {
+        if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.")
+        req.session.destroy((err) => {
+            if (err) return res.send(logOutResult)
+        
+            res.clearCookie('connect.sid')  // 세션 쿠키 삭제
+            logOutResult.success = true
+            res.send(logOutResult)
+        
+        })
+    }
+    catch (e) {
+        logOutResult.message = e.message
+        res.status(400).send(logOutResult)
+    }
+})
 
 module.exports = router
