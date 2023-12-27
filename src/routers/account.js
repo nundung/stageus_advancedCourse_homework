@@ -46,6 +46,7 @@ router.post("/", async (req, res) => {
 
         signUpResult.success = true
         signUpResult.message = "회원가입에 성공했습니다."
+        res.send(signUpResult)
     }
     catch (e) {
         signUpResult.message = e
