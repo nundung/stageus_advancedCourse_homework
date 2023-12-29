@@ -2,7 +2,6 @@
 const router = require("express").Router()
 const client = require('../../psql')
 const exception = require('../modules/exception')
-const duplicate = require('../modules/duplicateCheck')
 
 //Apis
 //게시물 목록(게시판)
