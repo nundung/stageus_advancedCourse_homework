@@ -29,13 +29,7 @@ router.post("/", async (req, res) => {
         const values = [id, pw, name, email]
         const data = await client.query(sql, values)
 
-        if (data.rowCount > 0) {
-            signUpResult.success = true;
-            signUpResult.message = "회원가입 완료"
-        }
-        else {
-            signUpResult.message = "회원가입에 실패했습니다."
-        }
+        if (data.rowCount === 0) throw new Error ("회원가입 실패")
         // res.send(signUpResult)
     }
     catch (e) {
@@ -66,8 +60,8 @@ router.post("/login", async (req, res) => {
         const values = [id, pw]
         const data = await client.query(sql, values)
 
-        if (data.rows.length === 0) throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.")
-        
+        if (data.rowCount === 0) throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.")
+
         // 로그인 성공
         req.session.user = {
             idx: data.rows[0].idx,
