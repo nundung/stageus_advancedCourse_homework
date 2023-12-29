@@ -16,7 +16,9 @@ router.get("/", async (req, res) => {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
         
         //db에 값 입력하기
-        const sql = "SELECT * FROM post ORDER BY idx DESC JOIN "
+        const sql = "SELECT account.id, post.* FROM post JOIN account ON post.account_idx = account.idx ORDER BY post.idx DESC" 
+        // JOIN account ON post.account_idx = account.idx:
+        // post 테이블과 account 테이블을 account_idx와 idx 열을 기준으로 조인. post 테이블의 account_idx와 account 테이블의 idx 값이 일치하는 행을 연결
         const data = await client.query(sql)
 
         if (data.rowCount > 0) {
@@ -80,18 +82,17 @@ router.get("/:postidx", async (req, res) => {
     const client = await pool.connect()
     try {
         if(!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
-        const sql = "SELECT account_idx, title, content FROM post WHERE idx=$1"
+        const sql = "SELECT account.id, post.* FROM post JOIN account ON post.account_idx = account.idx WHERE post.idx=$1"
         const values = [postIdx]
         const data = await client.query(sql, values)
 
-            if (data.rowCount === 0) throw new Error("게시글을 찾을 수 없습니다.")
+        if (data.rowCount === 0) throw new Error("게시글을 찾을 수 없습니다.")
 
-            viewPostResult.success = true
-            viewPostResult.data = data.rows
+        viewPostResult.success = true
+        viewPostResult.data = data.rows
     }
     catch (e) {
         viewPostResult.message = e.message
-        res.status(400).send(viewPostResult)
     }
     finally {
         if(client) client.release()

@@ -50,7 +50,7 @@ router.get("/", async (req, res) => {
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
 
-        const sql = "SELECT account_idx, content from comment WHERE post_idx=$1 ORDER BY idx OFFSET 0  LIMIT 20"
+        const sql = "SELECT account.id, comment.* from comment JOIN account ON comment.account_idx = account.idx WHERE post_idx=$1 ORDER BY idx OFFSET 0  LIMIT 20"
         const values = [postIdx]
         const data = await client.query(sql, values)
         
