@@ -1,4 +1,4 @@
-// Import
+//Import
 const router = require("express").Router()
 const client = require('../../psql')
 const exception = require('../modules/exception')
@@ -11,8 +11,7 @@ router.post("/", async (req, res) => {
     //백엔드에서 프론트로 보내줄 값 미리 생성
     const signUpResult = {
         "success": false,
-        "message": "",
-        "data": null
+        "message": ""
     }
     try {
         //정규식 체크
@@ -22,31 +21,21 @@ router.post("/", async (req, res) => {
         exception.emailCheck(email)
 
         //중복체크
-        duplicate.idCheck(id)
-        duplicate.emailCheck(email)
-
-        const idDuplicateMessage = await duplicate.idCheck(id);
-        const emailDuplicateMessage = await duplicate.emailCheck(email);
-
-        if (idDuplicateMessage) {
-            // signUpResult.message = idDuplicateMessage;
-            // return res.send(signUpResult);
-            throw new Error(idDuplicateMessage)
-        }
-
-        if (emailDuplicateMessage) {
-            // signUpResult.message = emailDuplicateMessage;
-            // return res.send(signUpResult);
-            throw new Error(emailDuplicateMessage)
-        }
+        await duplicate.idCheck(id)
+        await duplicate.emailCheck(email)
 
         //아이디/이메일 중복이 아닌 경우 회원가입
         const sql = "INSERT INTO account (id, pw, name, email) VALUES ($1, $2, $3, $4)" //물음표 여러개면 $1, $2, $3
         const values = [id, pw, name, email]
         const data = await client.query(sql, values)
 
-        signUpResult.success = true
-        signUpResult.message = "회원가입에 성공했습니다."
+        if (data.rowCount > 0) {
+            signUpResult.success = true;
+            signUpResult.message = "회원가입 완료"
+        }
+        else {
+            signUpResult.message = "회원가입에 실패했습니다."
+        }
         // res.send(signUpResult)
     }
     catch (e) {
@@ -73,15 +62,11 @@ router.post("/login", async (req, res) => {
         exception.pwCheck(pw)
 
         //db값 불러오기
-        const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2" //물음표 여러개면 $1, $2, $3
+        const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2"   //물음표 여러개면 $1, $2, $3
         const values = [id, pw]
         const data = await client.query(sql, values)
 
-        if (data.rows.length === 0) {
-            // 로그인 실패: 해당 아이디와 비밀번호로 계정을 찾을 수 없음
-            logInResult.message = "아이디 또는 비밀번호가 올바르지 않습니다."
-            return res.send(logInResult)
-        }
+        if (data.rows.length === 0) throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.")
         
         // 로그인 성공
         req.session.user = {
@@ -92,14 +77,13 @@ router.post("/login", async (req, res) => {
             email: data.rows[0].email
         }
         logInResult.success = true
-        res.send(logInResult)
     }
     catch (e) {
         logInResult.message = e.message
-        res.send(logInResult)
     }
     finally {
         if(client) client.end()      //끊어주지 않으면 언젠가 막힘 1000개까지 접속이 가능하기 때문에 1000개가 넘어가는 순간 막힘
+        res.send(logInResult)
     }
 })
 
@@ -111,16 +95,14 @@ router.get("/logout", async (req, res) => {
     }
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.")
-        await req.session.destroy(() => {
-            if (err) return res.send(logOutResult)
-
-            res.clearCookie('connect.sid')  // 세션 쿠키 삭제
-            logOutResult.success = true
-            res.send(logOutResult)
-        })
+        req.session.destroy() 
+        res.clearCookie('connect.sid')  // 세션 쿠키 삭제
+        logOutResult.success = true
     }
     catch (e) {
         logOutResult.message = e.message
+    }
+    finally {
         res.send(logOutResult)
     }
 })
@@ -137,10 +119,11 @@ router.get("/info", (req, res) => {
         const { id, pw, name, email } = req.session.user
         infoResult.success = true
         infoResult.data = {id, pw, name, email}
-        res.send(infoResult)
     }
     catch (e) {
         infoResult.message = e.message
+    }
+    finally {
         res.send(infoResult)
     }
 })
@@ -159,32 +142,38 @@ router.put("/info", async (req, res) => {
         exception.pwCheck(pw)
         exception.nameCheck(name)
         exception.emailCheck(email)
+
         //이메일 중복체크
         //이메일이 바뀌었을 때만 실행
         if (currentemail !== email) {
-            duplicate.emailCheck(email)
-            updateInfoEvent()
+            console.log(currentemail, email)
+            await duplicate.emailCheck(email)
         }
-        else updateInfoEvent()
-        
         //정보 수정
         //바뀐사항 있을 때만 실행하도록 하자 (12/27)
-        const updateInfoEvent = () => {
-            conn.query('UPDATE account SET pw=?, name=?, email=? WHERE idx=?', [pw, name, email, idx], (err) => {
-            if (err) return res.send(editInfoResult)
+        //db값 불러오기
+        const sql = "UPDATE account SET pw=$1, name=$2, email=$3 WHERE idx=$4"   //물음표 여러개면 $1, $2, $3
+        const values = [pw, name, email, idx]
+        const data = await client.query(sql, values)
+
+        if (data.rowCount > 0) {
             req.session.user = {
                 pw: pw,
                 name: name,
                 email: email
             }
-            editInfoResult.success = true 
-            editInfoResult.message = "정보수정이 완료되었습니다."
-            res.send(editInfoResult)
-            })
+            editInfoResult.success = true;
+            editInfoResult.message = "정보수정이 완료되었습니다.";
+        }
+        else {
+            editInfoResult.message = "변경된 내용이 없습니다.";
         }
     }
     catch (e) {
         editInfoResult.message = e.message
+    }
+    finally {
+        if(client) client.end()
         res.send(editInfoResult)
     }
 })
