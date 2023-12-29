@@ -33,15 +33,20 @@ exception.emailCheck = (email) => {
 }
 
 exception.titleCheck = (title) => {
-    if(title === null || title === "" || title === undefined) throw new Error("이메일 값이 이상해요")
+    if(title === null || title === "" || title === undefined) throw new Error("제목 값이 이상해요")
     const titleReg = /^.{1,100}$/;
     if(!titleReg.test(title)) throw new Error("제목 형식 불일치")
 }
 
 exception.contentCheck = (content) => {
-    if(content === null || content === "" || content === undefined) throw new Error("이메일 값이 이상해요")
+    if(content === null || content === "" || content === undefined) throw new Error("본문 값이 이상해요")
     const contentReg = /^.{1,1000}$/;
-    if(!contentReg.test(content)) throw new Error("내용 형식 불일치")
+    if(!contentReg.test(content)) throw new Error("본문 형식 불일치")
 }
 
+exception.commentCheck = (comment) => {
+    if(comment === null || comment === "" || comment === undefined) throw new Error("댓글 값이 이상해요")
+    const contentReg = /^.{1,200}$/;
+    if(!contentReg.test(comment)) throw new Error("댓글 형식 불일치")
+}
 module.exports = exception;

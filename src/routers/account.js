@@ -31,6 +31,8 @@ router.post("/", async (req, res) => {
 
         if (data.rowCount === 0) throw new Error ("회원가입 실패")
         // res.send(signUpResult)
+        signUpResult.success = true
+
     }
     catch (e) {
         signUpResult.message = e.message

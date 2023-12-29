@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
         "data": null
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.");
+        if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
         
         //db에 값 입력하기
         const sql = "SELECT * FROM post ORDER BY idx DESC"
