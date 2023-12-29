@@ -68,6 +68,35 @@ router.post("/",  async (req, res) => {
     }
 })
 
+//게시글 보기
+router.get("/:postidx", async (req, res) => {
+    const postIdx = req.params.postidx;
+    const viewPostResult = {
+        "success": false,
+        "message": "",
+        "data": null
+    }
+    try {
+        if(!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
+        const sql = "SELECT account_idx, title, content FROM post WHERE idx=$1"
+        const values = [postIdx]
+        const data = await client.query(sql, values)
+
+            if (data.rowCount === 0) throw new Error("게시글을 찾을 수 없습니다.")
+
+            viewPostResult.success = true
+            viewPostResult.data = data.rows
+    }
+    catch (e) {
+        viewPostResult.message = e.message
+        res.status(400).send(viewPostResult)
+    }
+    finally {
+        if(client) client.end()
+        res.send(viewPostResult)
+    }
+})
+
 //게시글 수정
 router.put("/:postidx", async (req, res) => {
     const postIdx = req.params.postidx
@@ -86,8 +115,7 @@ router.put("/:postidx", async (req, res) => {
         const values = [title, content, postIdx, idx]
         const data = await client.query(sql, values)
 
-        if (data.rowCount === 0) throw new Error("수정 권한이 없습니다.")
-        // 수정된 행이 없는 경우 처리
+        if (data.rowCount === 0) throw new Error("게시글 수정 실패")
 
         editPostResult.success = true
         editPostResult.message = "게시글 수정이 완료되었습니다."
@@ -100,5 +128,37 @@ router.put("/:postidx", async (req, res) => {
         res.send(editPostResult)
     }
 })
+
+
+//게시글 삭제
+router.delete("/:postidx", async (req, res) => {
+    const postIdx = req.params.postidx;
+    const deletePostResult = {
+        "success": false,
+        "message": ""
+    }
+    try {
+        if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
+        const idx = req.session.user.idx
+    console.log(idx)
+
+        const sql = "DELETE FROM post WHERE idx=$1 AND account_idx=$2"
+        const values = [postIdx, idx]
+        const data = await client.query(sql, values) 
+        
+        if (data.rowCount === 0) throw new Error("게시글 삭제 실패")
+
+        deletePostResult.success = true
+        deletePostResult.message = "게시글이 삭제되었습니다."
+    }
+    catch (e) {
+        deletePostResult.message = e.message
+    }
+    finally {
+        if(client) client.end()
+        res.send(deletePostResult)
+    }
+})
+
 
 module.exports = router
