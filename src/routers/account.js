@@ -70,6 +70,7 @@ router.post("/login", async (req, res) => {
             name: data.rows[0].name,
             email: data.rows[0].email
         }
+        console.log(req.session.user.idx)
         logInResult.success = true
     }
     catch (e) {
@@ -133,6 +134,7 @@ router.put("/info", async (req, res) => {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.");
         const idx = req.session.user.idx
         const currentemail = req.session.user.email
+        
         exception.pwCheck(pw)
         exception.nameCheck(name)
         exception.emailCheck(email)
@@ -156,11 +158,12 @@ router.put("/info", async (req, res) => {
                 name: name,
                 email: email
             }
-            editInfoResult.success = true;
-            editInfoResult.message = "정보수정이 완료되었습니다.";
+            editInfoResult.success = true
+            editInfoResult.message = "정보수정이 완료되었습니다."
         }
         else {
-            editInfoResult.message = "변경된 내용이 없습니다.";
+            editInfoResult.success = true
+            editInfoResult.message = "변경된 내용이 없습니다."
         }
     }
     catch (e) {

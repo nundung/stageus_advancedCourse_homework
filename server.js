@@ -23,8 +23,8 @@ app.use(session({
 const accountApi = require("./src/routers/account")
 app.use("/account", accountApi)
 
-// const postApi = require("./src/routers/post")
-// app.use("/post", postApi)
+const postApi = require("./src/routers/post")
+app.use("/post", postApi)
 
 // const commentApi = require("./src/routers/comment")
 // app.use("/comment", commentApi)
