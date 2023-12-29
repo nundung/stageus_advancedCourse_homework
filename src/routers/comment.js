@@ -9,7 +9,6 @@ router.post("/", async (req, res) => {
     const postIdx = req.query.postidx
     const {comment} = req.body
     const uploadCommentResult = {
-        "success": false,
         "message": ""
     }
     const client = await pool.connect()
@@ -25,14 +24,14 @@ router.post("/", async (req, res) => {
         const data = await client.query(sql, values)
 
         if (data.rowCount === 0)  throw new Error("댓글 업로드 실패")
-        uploadCommentResult.success = true
+        res.status(200).send(uploadCommentResult)
     }
     catch (e) {
         uploadCommentResult.message = e.message
+        res.status(400).send(uploadCommentResult)
     }
     finally {
         if(client) client.release()
-        res.send(uploadCommentResult)
     }
 })
 
@@ -42,7 +41,6 @@ router.get("/", async (req, res) => {
     // const page = req.query.page || 1  
     // const perPage = req.query.per_page || 10
     const viewCommentResult = {
-        "success": false,
         "message": "",
         "data": null
     }
@@ -56,20 +54,20 @@ router.get("/", async (req, res) => {
         
 
         if (data.rowCount > 0) {
-            viewCommentResult.success = true
             viewCommentResult.data = data.rows
+            res.status(200).send(viewCommentResult)
         }
         else {
-            viewCommentResult.success = true
             viewCommentResult.message = "아직 댓글이 없습니다."
+            res.status(200).send(viewCommentResult)
         }
     }
     catch (e) {
         viewCommentResult.message = e.message
+        res.status(400).send(viewCommentResult)
     }
     finally {
         if(client) client.release()
-        res.send(viewCommentResult)
     }
 })
 
@@ -78,7 +76,6 @@ router.put("/:commentidx", async (req, res) => {
     const contentIdx = req.params.commentidx
     const {comment} = req.body
     const editCommentResult = {
-        "success": false,
         "message": ""
     }
     const client = await pool.connect()
@@ -93,10 +90,11 @@ router.put("/:commentidx", async (req, res) => {
         const data = await client.query(sql, values)
         
         if (data.rowCount === 0) throw new Error ("댓글수정 실패")
-        editCommentResult.success = true
+        res.status(200).send(editCommentResult)
     }
     catch (e) {
         editCommentResult.message = e.message
+        res.status(400).send(editCommentResult)
     }
     finally {
         if(client) client.release()
@@ -121,14 +119,14 @@ router.delete("/:commentidx", async (req, res) => {
         const data = await client.query(sql, values)
         
         if (data.rowCount === 0) throw new Error ("댓글삭제 실패")
-        deleteCommentResult.success = true
+        res.status(200).send(deleteCommentResult)
     }
     catch (e) {
         deleteCommentResult.message = e.message
+        res.status(400).send(deleteCommentResult)
     }
     finally {
         if(client) client.release()
-        res.send(deleteCommentResult)
     }
 })
 

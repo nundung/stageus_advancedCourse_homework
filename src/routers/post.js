@@ -7,7 +7,6 @@ const exception = require('../modules/exception')
 //게시물 목록(게시판)
 router.get("/", async (req, res) => {
     const postBoardResult = {
-        "success": false,
         "message": "",
         "data": null
     }
@@ -22,20 +21,20 @@ router.get("/", async (req, res) => {
         const data = await client.query(sql)
 
         if (data.rowCount > 0) {
-            postBoardResult.success = true
             postBoardResult.data = data.rows
+            res.status(200).send(postBoardResult)
         }
         else {
-            postBoardResult.success = true
             postBoardResult.message = "게시글 목록이 비어있습니다."
+            res.status(200).send(postBoardResult)
         }
     }
     catch (e) {
         postBoardResult.message = e.message
+        res.status(400).send(postBoardResult)
     }
     finally {
         if(client) client.release()
-        res.send(postBoardResult)
     }
 })
 
@@ -43,7 +42,6 @@ router.get("/", async (req, res) => {
 router.post("/",  async (req, res) => {
     const {title, content} = req.body
     const uploadPostResult = {
-        "success": false,
         "message": ""
     }
     const client = await pool.connect()
@@ -60,14 +58,14 @@ router.post("/",  async (req, res) => {
 
         if (data.rowCount === 0) throw new Error("게시글 업로드 실패")
 
-        uploadPostResult.success = true
+        res.status(200).send(uploadPostResult)
     }
     catch (e) {
         uploadPostResult.message = e.message
+        res.status(400).send(uploadPostResult)
     }
     finally {
         if(client) client.release()
-        res.send(uploadPostResult)
     }
 })
 
@@ -75,7 +73,6 @@ router.post("/",  async (req, res) => {
 router.get("/:postidx", async (req, res) => {
     const postIdx = req.params.postidx;
     const viewPostResult = {
-        "success": false,
         "message": "",
         "data": null
     }
@@ -88,15 +85,16 @@ router.get("/:postidx", async (req, res) => {
 
         if (data.rowCount === 0) throw new Error("게시글을 찾을 수 없습니다.")
 
-        viewPostResult.success = true
         viewPostResult.data = data.rows
+        res.status(200).send(viewPostResult)
+
     }
     catch (e) {
         viewPostResult.message = e.message
+        res.status(400).send(viewPostResult)
     }
     finally {
         if(client) client.release()
-        res.send(viewPostResult)
     }
 })
 
@@ -105,7 +103,6 @@ router.put("/:postidx", async (req, res) => {
     const postIdx = req.params.postidx
     const {title, content} = req.body
     const editPostResult = {
-        "success": false,
         "message": ""
     }
     const client = await pool.connect()
@@ -121,15 +118,15 @@ router.put("/:postidx", async (req, res) => {
 
         if (data.rowCount === 0) throw new Error("게시글 수정 실패")
 
-        editPostResult.success = true
         editPostResult.message = "게시글 수정이 완료되었습니다."
+        res.status(200).send(editPostResult)
     }
     catch (e) {
         editPostResult.message = e.message
+        res.status(400).send(editPostResult)
     }
     finally {
         if(client) client.release()
-        res.send(editPostResult)
     }
 })
 
@@ -138,7 +135,6 @@ router.put("/:postidx", async (req, res) => {
 router.delete("/:postidx", async (req, res) => {
     const postIdx = req.params.postidx;
     const deletePostResult = {
-        "success": false,
         "message": ""
     }
     const client = await pool.connect()
@@ -153,15 +149,15 @@ router.delete("/:postidx", async (req, res) => {
         
         if (data.rowCount === 0) throw new Error("게시글 삭제 실패")
 
-        deletePostResult.success = true
         deletePostResult.message = "게시글이 삭제되었습니다."
+        res.status(200).send(deletePostResult)
     }
     catch (e) {
         deletePostResult.message = e.message
+        res.status(400).send(deletePostResult)
     }
     finally {
         if(client) client.release()
-        res.send(deletePostResult)
     }
 })
 

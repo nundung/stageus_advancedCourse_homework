@@ -9,7 +9,6 @@ const duplicate = require('../modules/duplicateCheck')
 router.post("/", async (req, res) => {
     const {id, pw, name, email} = req.body
     const signUpResult = {
-        "success": false,
         "message": ""
     }
     const client = await pool.connect()
@@ -30,16 +29,15 @@ router.post("/", async (req, res) => {
         const data = await client.query(sql, values)
 
         if (data.rowCount === 0) throw new Error ("회원가입 실패")
-        // res.send(signUpResult)
-        signUpResult.success = true
+
+        res.status(200).send(signUpResult)
     }
     catch (e) {
         signUpResult.message = e.message
-        // res.send(signUpResult)
+        res.status(400).send(signUpResult)
     }
     finally {
         if(pool) pool.release()     //끊어주지 않으면 언젠가 막힘 최대 접속 가능 개수를 넘으면 막힘 1000개까지 접속이 가능하기 때문에 1000개가 넘어가는 순간 막힘
-        res.send(signUpResult)
     }
 })
 
@@ -47,7 +45,6 @@ router.post("/", async (req, res) => {
 router.post("/login", async (req, res) => {
     const {id, pw} = req.body
     const logInResult = {
-        "success": false,
         "message": ""
     }
     const client = await pool.connect()
@@ -73,55 +70,49 @@ router.post("/login", async (req, res) => {
             email: data.rows[0].email
         }
         console.log(req.session.user.idx)
-        logInResult.success = true
+        res.status(200).send(logInResult)
     }
     catch (e) {
         logInResult.message = e.message
+        res.status(400).send(logInResult)
     }
     finally {
         if(client) client.release()     //끊어주지 않으면 언젠가 막힘 1000개까지 접속이 가능하기 때문에 1000개가 넘어가는 순간 막힘
-        res.send(logInResult)
     }
 })
 
 //로그아웃
 router.get("/logout", async (req, res) => {
     const logOutResult = {
-        "success": false,
         "message": ""
     }
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.")
         req.session.destroy() 
         res.clearCookie('connect.sid')  // 세션 쿠키 삭제
-        logOutResult.success = true
+        res.status(200).send(logOutResult)
     }
     catch (e) {
         logOutResult.message = e.message
-    }
-    finally {
-        res.send(logOutResult)
+        res.status(400).send(logOutResult)
     }
 })
 
 //내정보 보기
 router.get("/info", (req, res) => {
     const infoResult = {
-        "success": false,
         "message": "",
         "data": null
     }
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.")
         const { id, pw, name, email } = req.session.user
-        infoResult.success = true
         infoResult.data = {id, pw, name, email}
+        res.status(200).send(infoResult)
     }
     catch (e) {
         infoResult.message = e.message
-    }
-    finally {
-        res.send(infoResult)
+        res.status(400).send(infoResult)
     }
 })
 
@@ -148,9 +139,7 @@ router.put("/info", async (req, res) => {
             console.log(currentemail, email)
             await duplicate.emailCheck(email)
         }
-        //정보 수정
-        //바뀐사항 있을 때만 실행하도록 하자 (12/27)
-        //db값 불러오기
+
         const sql = "UPDATE account SET pw=$1, name=$2, email=$3 WHERE idx=$4"   //물음표 여러개면 $1, $2, $3
         const values = [pw, name, email, idx]
         const data = await client.query(sql, values)
@@ -161,16 +150,17 @@ router.put("/info", async (req, res) => {
                 name: name,
                 email: email
             }
-            editInfoResult.success = true
+            res.status(200).send(editInfoResult)
             editInfoResult.message = "정보수정이 완료되었습니다."
         }
         else {
-            editInfoResult.success = true
+            res.status(200).send(editInfoResult)
             editInfoResult.message = "변경된 내용이 없습니다."
         }
     }
     catch (e) {
         editInfoResult.message = e.message
+        res.status(400).send(editInfoResult)
     }
     finally {
         if(client) client.release()
