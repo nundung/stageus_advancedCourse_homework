@@ -1,7 +1,7 @@
 //Import
 const router = require("express").Router()
-const client = require('../../psql')
-const exception = require('../modules/exception')
+const pool = require("../../psql")
+const exception = require("../modules/exception")
 
 //Apis
 //댓글 업로드
@@ -12,6 +12,7 @@ router.post("/", async (req, res) => {
         "success": false,
         "message": ""
     }
+    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.")
         const idx = req.session.user.idx
@@ -20,6 +21,7 @@ router.post("/", async (req, res) => {
 
         const sql = "INSERT INTO comment (post_idx, account_idx, content) VALUES ($1, $2, $3)"
         const values = [postIdx, idx, comment]
+        client = await pool.connect()
         const data = await client.query(sql, values)
 
         if (data.rowCount === 0)  throw new Error("댓글 업로드 실패")
@@ -29,12 +31,12 @@ router.post("/", async (req, res) => {
         uploadCommentResult.message = e.message
     }
     finally {
-        if(client) client.end()
+        if(client) client.release()
         res.send(uploadCommentResult)
     }
 })
 
-//댓글 읽기
+//댓글 보기
 router.get("/", async (req, res) => {
     const postIdx = req.query.postidx
     // const page = req.query.page || 1  
@@ -44,26 +46,29 @@ router.get("/", async (req, res) => {
         "message": "",
         "data": null
     }
+    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
 
-        // 페이지네이션을 위한 계산
-        // const offset = (page - 1) * perPage                LIMIT $2 OFFSET $3
-
-        const sql = "SELECT account_idx, content from comment WHERE post_idx=$1"
+        const sql = "SELECT account_idx, content from comment WHERE post_idx=$1 ORDER BY idx OFFSET 0  LIMIT 20"
         const values = [postIdx]
         const data = await client.query(sql, values)
         
-        if (data.rowCount === 0) throw new Error ("댓글불러오기 실패")
 
-        viewCommentResult.success = true
-        viewCommentResult.data = data.rows
+        if (data.rowCount > 0) {
+            viewCommentResult.success = true
+            viewCommentResult.data = data.rows
+        }
+        else {
+            viewCommentResult.success = true
+            viewCommentResult.message = "아직 댓글이 없습니다."
+        }
     }
     catch (e) {
         viewCommentResult.message = e.message
     }
     finally {
-        if(client) client.end()
+        if(client) client.release()
         res.send(viewCommentResult)
     }
 })
@@ -76,6 +81,7 @@ router.put("/:commentidx", async (req, res) => {
         "success": false,
         "message": ""
     }
+    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
         const idx = req.session.user.idx
@@ -93,7 +99,7 @@ router.put("/:commentidx", async (req, res) => {
         editCommentResult.message = e.message
     }
     finally {
-        if(client) client.end()
+        if(client) client.release()
         res.send(editCommentResult)
     }
 })
@@ -105,6 +111,7 @@ router.delete("/:commentidx", async (req, res) => {
         "success": false,
         "message": ""
     }
+    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
         const idx = req.session.user.idx
@@ -120,8 +127,9 @@ router.delete("/:commentidx", async (req, res) => {
         deleteCommentResult.message = e.message
     }
     finally {
-        if(client) client.end()
+        if(client) client.release()
         res.send(deleteCommentResult)
     }
 })
+
 module.exports = router

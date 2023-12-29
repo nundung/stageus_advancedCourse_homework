@@ -1,6 +1,6 @@
 //Import
 const router = require("express").Router()
-const client = require('../../psql')
+const pool = require('../../psql')
 const exception = require('../modules/exception')
 
 //Apis
@@ -11,11 +11,12 @@ router.get("/", async (req, res) => {
         "message": "",
         "data": null
     }
+    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
         
         //db에 값 입력하기
-        const sql = "SELECT * FROM post ORDER BY idx DESC"
+        const sql = "SELECT * FROM post ORDER BY idx DESC JOIN "
         const data = await client.query(sql)
 
         if (data.rowCount > 0) {
@@ -31,7 +32,7 @@ router.get("/", async (req, res) => {
         postBoardResult.message = e.message
     }
     finally {
-        if(client) client.end()
+        if(client) client.release()
         res.send(postBoardResult)
     }
 })
@@ -43,6 +44,7 @@ router.post("/",  async (req, res) => {
         "success": false,
         "message": ""
     }
+    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
         const idx = req.session.user.idx
@@ -62,7 +64,7 @@ router.post("/",  async (req, res) => {
         uploadPostResult.message = e.message
     }
     finally {
-        if(client) client.end()
+        if(client) client.release()
         res.send(uploadPostResult)
     }
 })
@@ -75,6 +77,7 @@ router.get("/:postidx", async (req, res) => {
         "message": "",
         "data": null
     }
+    const client = await pool.connect()
     try {
         if(!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
         const sql = "SELECT account_idx, title, content FROM post WHERE idx=$1"
@@ -91,7 +94,7 @@ router.get("/:postidx", async (req, res) => {
         res.status(400).send(viewPostResult)
     }
     finally {
-        if(client) client.end()
+        if(client) client.release()
         res.send(viewPostResult)
     }
 })
@@ -104,6 +107,7 @@ router.put("/:postidx", async (req, res) => {
         "success": false,
         "message": ""
     }
+    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.");
         const idx = req.session.user.idx
@@ -123,7 +127,7 @@ router.put("/:postidx", async (req, res) => {
         editPostResult.message = e.message
     }
     finally {
-        if(client) client.end()
+        if(client) client.release()
         res.send(editPostResult)
     }
 })
@@ -136,6 +140,7 @@ router.delete("/:postidx", async (req, res) => {
         "success": false,
         "message": ""
     }
+    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
         const idx = req.session.user.idx
@@ -154,7 +159,7 @@ router.delete("/:postidx", async (req, res) => {
         deletePostResult.message = e.message
     }
     finally {
-        if(client) client.end()
+        if(client) client.release()
         res.send(deletePostResult)
     }
 })
