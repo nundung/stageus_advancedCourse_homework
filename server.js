@@ -3,19 +3,28 @@
 const express = require("express")
 const session = require("express-session")
 const FileStore = require("session-file-store")(session)
+const crypto = require("crypto")     // 난수 생성 모듈  
+// const mongo = require ("connect-mongo")
+
+require('dotenv').config()
 
 // Init
 const app = express()
 const port = 8000
+const createSessionSecret = (password) => {
+    return crypto.createHash("sha512").update(password).digest("base64");
+};
+console.log('생성된 세션 시크릿:', createSessionSecret("1234")); // 생성된 세션 시크릿을 콘솔에 출력합니다.
 
 app.use(express.json()) //보낼 json을 자동으로 string으로 변환 / 받은 string을
 
 app.use(session({ 
     //난수로 만들라고 하셨음
-    secret: "abcd",   // 세션을 암호화
+    secret: process.env.SESSION_SECRET,   // 세션을 암호화
     resave: false,            // 세션을 항상 저장할지 결정 (false를 권장)     
-    saveUninitialized: true,  // 초기화 되지 않은채로 스토어에 저장할지를 결정
+    saveUninitialized: false,  // 초기화 되지 않은채로 스토어에 저장할지를 결정
     store: new FileStore()    // 데이터를 저장하는 형식
+    //store: mongo.create({ mongoUrl: "db_url" })
 }))
 
 
