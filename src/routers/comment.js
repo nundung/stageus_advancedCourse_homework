@@ -13,14 +13,13 @@ router.post("/", async (req, res) => {
     }
     const client = await pool.connect()
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.")
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         const idx = req.session.user.idx
 
         exception.commentCheck(comment)
 
         const sql = "INSERT INTO comment (post_idx, account_idx, content) VALUES ($1, $2, $3)"
         const values = [postIdx, idx, comment]
-        client = await pool.connect()
         const data = await client.query(sql, values)
 
         if (data.rowCount === 0)  throw new Error("댓글 업로드 실패")
@@ -38,17 +37,15 @@ router.post("/", async (req, res) => {
 //댓글 보기
 router.get("/", async (req, res) => {
     const postIdx = req.query.postidx
-    // const page = req.query.page || 1  
-    // const perPage = req.query.per_page || 10
     const viewCommentResult = {
         "message": "",
         "data": null
     }
     const client = await pool.connect()
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
 
-        const sql = "SELECT account.id, comment.* from comment JOIN account ON comment.account_idx = account.idx WHERE post_idx=$1 ORDER BY idx OFFSET 0  LIMIT 20"
+        const sql = "SELECT account.id, comment.* from comment JOIN account ON comment.account_idx = account.idx WHERE post_idx=$1 ORDER BY idx"
         const values = [postIdx]
         const data = await client.query(sql, values)
         
@@ -80,7 +77,7 @@ router.put("/:commentidx", async (req, res) => {
     }
     const client = await pool.connect()
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         const idx = req.session.user.idx
     
         exception.commentCheck(comment)
@@ -98,7 +95,6 @@ router.put("/:commentidx", async (req, res) => {
     }
     finally {
         if(client) client.release()
-        res.send(editCommentResult)
     }
 })
 
@@ -106,12 +102,11 @@ router.put("/:commentidx", async (req, res) => {
 router.delete("/:commentidx", async (req, res) => {
     const contentIdx = req.params.commentidx
     const deleteCommentResult = {
-        "success": false,
         "message": ""
     }
     const client = await pool.connect()
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         const idx = req.session.user.idx
         
         const sql = "DELETE FROM comment WHERE idx=$1 AND account_idx=$2"

@@ -37,7 +37,7 @@ router.post("/", async (req, res) => {
         res.status(400).send(signUpResult)
     }
     finally {
-        if(pool) pool.release()     //끊어주지 않으면 언젠가 막힘 최대 접속 가능 개수를 넘으면 막힘 1000개까지 접속이 가능하기 때문에 1000개가 넘어가는 순간 막힘
+        if(client) client.release()     //끊어주지 않으면 언젠가 막힘 최대 접속 가능 개수를 넘으면 막힘 1000개까지 접속이 가능하기 때문에 1000개가 넘어가는 순간 막힘
     }
 })
 
@@ -87,7 +87,7 @@ router.get("/logout", async (req, res) => {
         "message": ""
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.")
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         req.session.destroy() 
         res.clearCookie('connect.sid')  // 세션 쿠키 삭제
         res.status(200).send(logOutResult)
@@ -105,7 +105,7 @@ router.get("/info", (req, res) => {
         "data": null
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.")
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         const { id, pw, name, email } = req.session.user
         infoResult.data = {id, pw, name, email}
         res.status(200).send(infoResult)
@@ -120,12 +120,11 @@ router.get("/info", (req, res) => {
 router.put("/info", async (req, res) => {
     const {pw, name, email} = req.body
     const editInfoResult = {
-        "success": false,
         "message": ""
     }
     const client = await pool.connect()
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 존재하지 않습니다.");
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음");
         const idx = req.session.user.idx
         const currentemail = req.session.user.email
         
@@ -144,19 +143,20 @@ router.put("/info", async (req, res) => {
         const values = [pw, name, email, idx]
         const data = await client.query(sql, values)
 
+        if(data.rowCount === 0) throw new Error("정보수정 실패")
         if (data.rowCount > 0) {
             req.session.user = {
+                ...req.session.user,
                 pw: pw,
                 name: name,
                 email: email
             }
-            res.status(200).send(editInfoResult)
             editInfoResult.message = "정보수정이 완료되었습니다."
         }
-        else {
-            res.status(200).send(editInfoResult)
-            editInfoResult.message = "변경된 내용이 없습니다."
-        }
+        // else {
+        //     editInfoResult.message = "변경된 내용이 없습니다."
+        // }
+        res.status(200).send(editInfoResult)
     }
     catch (e) {
         editInfoResult.message = e.message
@@ -164,9 +164,39 @@ router.put("/info", async (req, res) => {
     }
     finally {
         if(client) client.release()
-        res.send(editInfoResult)
     }
 })
 
+//계정 삭제
+router.delete("/", async (req, res) => {
+    const deleteAccountResult = {
+        "message": ""
+    }
+    const client = await pool.connect()
+    try {
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음");
+        const idx = req.session.user.idx;
+
+        const sql = "DELETE FROM account WHERE idx=$1"
+        const values = [idx]
+        const data = client.query(sql, values)
+
+        if (data.rowCount === 0) throw new Error ("회원탈퇴 실패")
+
+        req.session.destroy() 
+        res.clearCookie('connect.sid')  // 세션 쿠키 삭제
+
+        deleteAccountResult.message = "회원탈퇴가 완료되었습니다."
+        res.status(200).send(deleteAccountResult)
+        
+    }
+    catch (e) {
+        deleteAccountResult.message = e.message
+        res.status(400).send(deleteAccountResult)
+    }
+    finally {
+        if(client) client.release()
+    }
+})
 
 module.exports = router

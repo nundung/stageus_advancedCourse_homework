@@ -14,7 +14,7 @@ const port = 8000
 const createSessionSecret = (password) => {
     return crypto.createHash("sha512").update(password).digest("base64");
 };
-console.log('생성된 세션 시크릿:', createSessionSecret("1234")); // 생성된 세션 시크릿을 콘솔에 출력합니다.
+// console.log('생성된 세션 시크릿:', createSessionSecret("1234")); 
 
 app.use(express.json()) //보낼 json을 자동으로 string으로 변환 / 받은 string을
 

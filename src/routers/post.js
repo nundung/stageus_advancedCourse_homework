@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
     }
     const client = await pool.connect()
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         
         //db에 값 입력하기
         const sql = "SELECT account.id, post.* FROM post JOIN account ON post.account_idx = account.idx ORDER BY post.idx DESC" 
@@ -46,7 +46,7 @@ router.post("/",  async (req, res) => {
     }
     const client = await pool.connect()
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         const idx = req.session.user.idx
 
         exception.titleCheck(title)
@@ -78,7 +78,7 @@ router.get("/:postidx", async (req, res) => {
     }
     const client = await pool.connect()
     try {
-        if(!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
+        if(!req.session.user) throw new Error("세션에 사용자 정보 없음")
         const sql = "SELECT account.id, post.* FROM post JOIN account ON post.account_idx = account.idx WHERE post.idx=$1"
         const values = [postIdx]
         const data = await client.query(sql, values)
@@ -107,7 +107,7 @@ router.put("/:postidx", async (req, res) => {
     }
     const client = await pool.connect()
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.");
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음");
         const idx = req.session.user.idx
 
         exception.titleCheck(title)
@@ -139,7 +139,7 @@ router.delete("/:postidx", async (req, res) => {
     }
     const client = await pool.connect()
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보가 없습니다.")
+        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         const idx = req.session.user.idx
     console.log(idx)
 
