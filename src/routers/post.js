@@ -10,7 +10,6 @@ router.get("/", async (req, res) => {
         "message": "",
         "data": null
     }
-    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         
@@ -22,7 +21,8 @@ router.get("/", async (req, res) => {
         ORDER BY post.idx DESC`
         // JOIN account ON post.account_idx = account.idx:
         // post 테이블과 account 테이블을 account_idx와 idx 열을 기준으로 조인. post 테이블의 account_idx와 account 테이블의 idx 값이 일치하는 행을 연결
-        const data = await pool.query(sql, values)
+        
+        const data = await pool.query(sql)
 
         if (data.rowCount > 0) {
             postBoardResult.data = data.rows

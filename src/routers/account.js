@@ -12,6 +12,11 @@ router.post("/", async (req, res) => {
         "message": ""
     }
     try {
+        if (req.session.user) {
+            const e = new Error("이미 로그인 되어있습니다.")
+            e.status = 403         //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않습니다.
+            throw e
+        }
         //정규식 체크
         exception.idCheck(id)
         exception.pwCheck(pw)
@@ -27,13 +32,12 @@ router.post("/", async (req, res) => {
         const values = [id, pw, name, email]
         const data = await pool.query(sql, values)
 
-        if (data.rowCount === 0) throw new Error ("회원가입 실패")
-
         res.status(200).send(signUpResult)
     }
     catch (e) {
         signUpResult.message = e.message
-        res.status(400).send(signUpResult)
+        const statusCode = e.status || 500; // 에러 객체에 status가 없을 경우 기본값으로 500 설정
+        res.status(statusCode).send(signUpResult);
     }
 })
 
