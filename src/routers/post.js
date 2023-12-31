@@ -15,10 +15,14 @@ router.get("/", async (req, res) => {
         if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         
         //db에 값 입력하기
-        const sql = "SELECT account.id, post.* FROM post JOIN account ON post.account_idx = account.idx ORDER BY post.idx DESC" 
+        const sql = 
+        `SELECT account.id, post.* 
+        FROM post JOIN account 
+        ON post.account_idx = account.idx 
+        ORDER BY post.idx DESC`
         // JOIN account ON post.account_idx = account.idx:
         // post 테이블과 account 테이블을 account_idx와 idx 열을 기준으로 조인. post 테이블의 account_idx와 account 테이블의 idx 값이 일치하는 행을 연결
-        const data = await client.query(sql)
+        const data = await pool.query(sql, values)
 
         if (data.rowCount > 0) {
             postBoardResult.data = data.rows
@@ -33,9 +37,6 @@ router.get("/", async (req, res) => {
         postBoardResult.message = e.message
         res.status(400).send(postBoardResult)
     }
-    finally {
-        if(client) client.release()
-    }
 })
 
 //게시글 업로드
@@ -44,7 +45,6 @@ router.post("/",  async (req, res) => {
     const uploadPostResult = {
         "message": ""
     }
-    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         const idx = req.session.user.idx
@@ -54,7 +54,7 @@ router.post("/",  async (req, res) => {
 
         const sql = "INSERT INTO post(account_idx, title, content) VALUES ($1, $2, $3)"
         const values = [idx, title, content]
-        const data = await client.query(sql, values)
+        const data = await pool.query(sql, values)
 
         if (data.rowCount === 0) throw new Error("게시글 업로드 실패")
 
@@ -63,9 +63,6 @@ router.post("/",  async (req, res) => {
     catch (e) {
         uploadPostResult.message = e.message
         res.status(400).send(uploadPostResult)
-    }
-    finally {
-        if(client) client.release()
     }
 })
 
@@ -76,12 +73,11 @@ router.get("/:postidx", async (req, res) => {
         "message": "",
         "data": null
     }
-    const client = await pool.connect()
     try {
         if(!req.session.user) throw new Error("세션에 사용자 정보 없음")
         const sql = "SELECT account.id, post.* FROM post JOIN account ON post.account_idx = account.idx WHERE post.idx=$1"
         const values = [postIdx]
-        const data = await client.query(sql, values)
+        const data = await pool.query(sql, values)
 
         if (data.rowCount === 0) throw new Error("게시글을 찾을 수 없습니다.")
 
@@ -93,9 +89,6 @@ router.get("/:postidx", async (req, res) => {
         viewPostResult.message = e.message
         res.status(400).send(viewPostResult)
     }
-    finally {
-        if(client) client.release()
-    }
 })
 
 //게시글 수정
@@ -105,7 +98,6 @@ router.put("/:postidx", async (req, res) => {
     const editPostResult = {
         "message": ""
     }
-    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보 없음");
         const idx = req.session.user.idx
@@ -114,7 +106,7 @@ router.put("/:postidx", async (req, res) => {
         exception.contentCheck(content)
         const sql = "UPDATE post SET title=$1, content=$2 WHERE idx=$3 AND account_idx=$4"
         const values = [title, content, postIdx, idx]
-        const data = await client.query(sql, values)
+        const data = await pool.query(sql, values)
 
         if (data.rowCount === 0) throw new Error("게시글 수정 실패")
 
@@ -125,9 +117,6 @@ router.put("/:postidx", async (req, res) => {
         editPostResult.message = e.message
         res.status(400).send(editPostResult)
     }
-    finally {
-        if(client) client.release()
-    }
 })
 
 
@@ -137,7 +126,6 @@ router.delete("/:postidx", async (req, res) => {
     const deletePostResult = {
         "message": ""
     }
-    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
         const idx = req.session.user.idx
@@ -145,7 +133,7 @@ router.delete("/:postidx", async (req, res) => {
 
         const sql = "DELETE FROM post WHERE idx=$1 AND account_idx=$2"
         const values = [postIdx, idx]
-        const data = await client.query(sql, values) 
+        const data = await pool.query(sql, values) 
         
         if (data.rowCount === 0) throw new Error("게시글 삭제 실패")
 
@@ -155,9 +143,6 @@ router.delete("/:postidx", async (req, res) => {
     catch (e) {
         deletePostResult.message = e.message
         res.status(400).send(deletePostResult)
-    }
-    finally {
-        if(client) client.release()
     }
 })
 

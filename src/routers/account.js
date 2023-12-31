@@ -11,7 +11,6 @@ router.post("/", async (req, res) => {
     const signUpResult = {
         "message": ""
     }
-    const client = await pool.connect()
     try {
         //정규식 체크
         exception.idCheck(id)
@@ -26,7 +25,7 @@ router.post("/", async (req, res) => {
         //아이디/이메일 중복이 아닌 경우 회원가입
         const sql = "INSERT INTO account (id, pw, name, email) VALUES ($1, $2, $3, $4)" //물음표 여러개면 $1, $2, $3
         const values = [id, pw, name, email]
-        const data = await client.query(sql, values)
+        const data = await pool.query(sql, values)
 
         if (data.rowCount === 0) throw new Error ("회원가입 실패")
 
@@ -36,9 +35,6 @@ router.post("/", async (req, res) => {
         signUpResult.message = e.message
         res.status(400).send(signUpResult)
     }
-    finally {
-        if(client) client.release()     //끊어주지 않으면 언젠가 막힘 최대 접속 가능 개수를 넘으면 막힘 1000개까지 접속이 가능하기 때문에 1000개가 넘어가는 순간 막힘
-    }
 })
 
 //로그인
@@ -47,7 +43,6 @@ router.post("/login", async (req, res) => {
     const logInResult = {
         "message": ""
     }
-    const client = await pool.connect()
     try {
         if (req.session.user) throw new Error("이미 로그인 되어있습니다.")
 
@@ -57,7 +52,7 @@ router.post("/login", async (req, res) => {
         //db값 불러오기
         const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2"   //물음표 여러개면 $1, $2, $3
         const values = [id, pw]
-        const data = await client.query(sql, values)
+        const data = await pool.query(sql, values)
 
         if (data.rowCount === 0) throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.")
 
@@ -75,9 +70,6 @@ router.post("/login", async (req, res) => {
     catch (e) {
         logInResult.message = e.message
         res.status(400).send(logInResult)
-    }
-    finally {
-        if(client) client.release()     //끊어주지 않으면 언젠가 막힘 1000개까지 접속이 가능하기 때문에 1000개가 넘어가는 순간 막힘
     }
 })
 
@@ -122,12 +114,10 @@ router.put("/info", async (req, res) => {
     const editInfoResult = {
         "message": ""
     }
-    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보 없음");
         const idx = req.session.user.idx
         const currentemail = req.session.user.email
-        
         exception.pwCheck(pw)
         exception.nameCheck(name)
         exception.emailCheck(email)
@@ -141,29 +131,22 @@ router.put("/info", async (req, res) => {
 
         const sql = "UPDATE account SET pw=$1, name=$2, email=$3 WHERE idx=$4"   //물음표 여러개면 $1, $2, $3
         const values = [pw, name, email, idx]
-        const data = await client.query(sql, values)
+        const data = await pool.query(sql, values)
 
         if(data.rowCount === 0) throw new Error("정보수정 실패")
-        if (data.rowCount > 0) {
-            req.session.user = {
-                ...req.session.user,
-                pw: pw,
-                name: name,
-                email: email
-            }
-            editInfoResult.message = "정보수정이 완료되었습니다."
+        req.session.user = {
+            ...req.session.user,
+            pw: pw,
+            name: name,
+            email: email
         }
-        // else {
-        //     editInfoResult.message = "변경된 내용이 없습니다."
-        // }
+        editInfoResult.message = "정보수정이 완료되었습니다."
+    
         res.status(200).send(editInfoResult)
     }
     catch (e) {
         editInfoResult.message = e.message
         res.status(400).send(editInfoResult)
-    }
-    finally {
-        if(client) client.release()
     }
 })
 
@@ -172,14 +155,13 @@ router.delete("/", async (req, res) => {
     const deleteAccountResult = {
         "message": ""
     }
-    const client = await pool.connect()
     try {
         if (!req.session.user) throw new Error("세션에 사용자 정보 없음");
         const idx = req.session.user.idx;
 
         const sql = "DELETE FROM account WHERE idx=$1"
         const values = [idx]
-        const data = client.query(sql, values)
+        const data = await pool.query(sql, values)
 
         if (data.rowCount === 0) throw new Error ("회원탈퇴 실패")
 
@@ -193,9 +175,6 @@ router.delete("/", async (req, res) => {
     catch (e) {
         deleteAccountResult.message = e.message
         res.status(400).send(deleteAccountResult)
-    }
-    finally {
-        if(client) client.release()
     }
 })
 
