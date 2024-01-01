@@ -1,5 +1,5 @@
 // import dl
-const client = require('../../psql')
+const client = require('../database/connect')
 const duplicate = {}
 
 //아이디 중복체크

@@ -1,6 +1,6 @@
 //Import
 const router = require("express").Router()
-const pool = require("../../psql")
+const pool = require("../database/connect")
 const exception = require("../modules/exception")
 
 //Apis

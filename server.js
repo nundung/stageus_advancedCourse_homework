@@ -17,8 +17,8 @@ app.use(session({
     //store: mongo.create({ mongoUrl: "db_url" })
 }))
 
-
 //Apis
+
 const accountApi = require("./src/routers/account")
 app.use("/account", accountApi)
 
@@ -28,6 +28,16 @@ app.use("/post", postApi)
 const commentApi = require("./src/routers/comment")
 app.use("/comment", commentApi)
 
+// const errorhandling = require("./src/middlewares/error")
+// app.use(errorhandling)
+
+app.use((err, req, res, next) => {
+    res.status(err.status || 500).json({
+        error: {
+            message: err.message || '서버 오류가 발생했습니다.'
+        }
+    });
+});
 //web Server
 app.listen(port, () => {
     console.log(`${port}번에서 HTTP 웹서버 실행`)
