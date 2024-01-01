@@ -11,8 +11,11 @@ router.get("/", async (req, res) => {
         "data": null
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
-        
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         //db에 값 입력하기
         const sql = 
         `SELECT account.id, post.* 
@@ -46,7 +49,11 @@ router.post("/",  async (req, res) => {
         "message": ""
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         const idx = req.session.user.idx
 
         exception.titleCheck(title)
@@ -74,7 +81,11 @@ router.get("/:postidx", async (req, res) => {
         "data": null
     }
     try {
-        if(!req.session.user) throw new Error("세션에 사용자 정보 없음")
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         const sql = "SELECT account.id, post.* FROM post JOIN account ON post.account_idx = account.idx WHERE post.idx=$1"
         const values = [postIdx]
         const data = await pool.query(sql, values)
@@ -99,7 +110,11 @@ router.put("/:postidx", async (req, res) => {
         "message": ""
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음");
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         const idx = req.session.user.idx
 
         exception.titleCheck(title)
@@ -127,7 +142,11 @@ router.delete("/:postidx", async (req, res) => {
         "message": ""
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         const idx = req.session.user.idx
     console.log(idx)
 

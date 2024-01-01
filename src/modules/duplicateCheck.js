@@ -9,7 +9,11 @@ duplicate.idCheck = async(id) => {
         const values = [id]
         const data = await client.query(sql, values)
 
-        if (data.rows.length > 0) throw new Error ("이미 사용 중인 아이디입니다.")
+        if (data.rows.length > 0) {
+            const e = new Error("이미 사용 중인 아이디입니다.")
+            e.status = 409         //이미 존재하는 리소스에 대한 중복된 생성 요청
+            throw e
+        }
     }
     catch (error) {
         throw error
@@ -23,7 +27,11 @@ duplicate.emailCheck = async(email) => {
         const values = [email]
         const data = await client.query(sql, values)
 
-        if (data.rows.length > 0) throw new Error ("이미 사용 중인 이메일입니다.")
+        if (data.rows.length > 0) {
+            const e = new Error("이미 사용 중인 이메일입니다.")
+            e.status = 409         //이미 존재하는 리소스에 대한 중복된 생성 요청
+            throw e
+        }
     }
     catch (error) {
         throw error

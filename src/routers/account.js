@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
     try {
         if (req.session.user) {
             const e = new Error("이미 로그인 되어있습니다.")
-            e.status = 403         //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않습니다.
+            e.status = 403         //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
             throw e
         }
         //정규식 체크
@@ -32,12 +32,12 @@ router.post("/", async (req, res) => {
         const values = [id, pw, name, email]
         const data = await pool.query(sql, values)
 
-        res.status(200).send(signUpResult)
+        res.status(201).send(signUpResult)
     }
     catch (e) {
         signUpResult.message = e.message
-        const statusCode = e.status || 500; // 에러 객체에 status가 없을 경우 기본값으로 500 설정
-        res.status(statusCode).send(signUpResult);
+        const statusCode = e.status || 500 // 에러 객체에 status가 없을 경우 기본값으로 500 설정
+        res.status(statusCode).send(signUpResult)
     }
 })
 
@@ -48,8 +48,12 @@ router.post("/login", async (req, res) => {
         "message": ""
     }
     try {
-        if (req.session.user) throw new Error("이미 로그인 되어있습니다.")
-
+        if (req.session.user) {
+            const e = new Error("이미 로그인 되어있습니다.")
+            e.status = 403     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            // (401이랑 다르게 서버는 클라이언트가 누구인지 알고 있음)
+            throw e
+        }
         exception.idCheck(id)
         exception.pwCheck(pw)
 
@@ -58,7 +62,11 @@ router.post("/login", async (req, res) => {
         const values = [id, pw]
         const data = await pool.query(sql, values)
 
-        if (data.rowCount === 0) throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.")
+        if (data.rowCount === 0) {
+            const e = new Error("아이디 또는 비밀번호가 올바르지 않습니다.")
+            e.status = 401         //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다. (인증X)
+            throw e
+        }
 
         // 로그인 성공
         req.session.user = {
@@ -73,7 +81,8 @@ router.post("/login", async (req, res) => {
     }
     catch (e) {
         logInResult.message = e.message
-        res.status(400).send(logInResult)
+        const statusCode = e.status || 500; // 에러 객체에 status가 없을 경우 기본값으로 500 설정
+        res.status(statusCode).send(logInResult)
     }
 })
 
@@ -83,7 +92,11 @@ router.get("/logout", async (req, res) => {
         "message": ""
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         req.session.destroy() 
         res.clearCookie('connect.sid')  // 세션 쿠키 삭제
         res.status(200).send(logOutResult)
@@ -101,7 +114,11 @@ router.get("/info", (req, res) => {
         "data": null
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         const { id, pw, name, email } = req.session.user
         infoResult.data = {id, pw, name, email}
         res.status(200).send(infoResult)
@@ -119,7 +136,11 @@ router.put("/info", async (req, res) => {
         "message": ""
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음");
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         const idx = req.session.user.idx
         const currentemail = req.session.user.email
         exception.pwCheck(pw)
@@ -160,7 +181,11 @@ router.delete("/", async (req, res) => {
         "message": ""
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음");
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         const idx = req.session.user.idx;
 
         const sql = "DELETE FROM account WHERE idx=$1"

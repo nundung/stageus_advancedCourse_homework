@@ -12,7 +12,11 @@ router.post("/", async (req, res) => {
         "message": ""
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         const idx = req.session.user.idx
 
         exception.commentCheck(comment)
@@ -39,7 +43,11 @@ router.get("/", async (req, res) => {
         "data": null
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
 
         const sql = "SELECT account.id, comment.* from comment JOIN account ON comment.account_idx = account.idx WHERE post_idx=$1 ORDER BY idx"
         const values = [postIdx]
@@ -68,7 +76,11 @@ router.put("/:commentidx", async (req, res) => {
         "message": ""
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         const idx = req.session.user.idx
     
         exception.commentCheck(comment)
@@ -93,7 +105,11 @@ router.delete("/:commentidx", async (req, res) => {
         "message": ""
     }
     try {
-        if (!req.session.user) throw new Error("세션에 사용자 정보 없음")
+        if (!req.session.user) {
+            const e = new Error("세션에 사용자 정보 없음")
+            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+            throw e
+        }
         const idx = req.session.user.idx
         
         const sql = "DELETE FROM comment WHERE idx=$1 AND account_idx=$2"
