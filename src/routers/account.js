@@ -3,23 +3,27 @@ const router = require("express").Router()
 const pool = require('../database/connect')
 const exception = require('../modules/exception')
 const duplicate = require('../modules/duplicateCheck')
-const controller = require("../controller/accountController")
-const middleware = require("../middleware/account")
+const controller = require("../controllers/accountController")
+const middleware = require("../middlewares/accountMiddleware")
 
 //Apis
 //회원가입 & 아이디/이메일 중복체크
-router.post("/", middleware.sessionCheck, controller.register)
+router.post("/",
+middleware.sessionCheck,
+middleware.existCheck,
+middleware.idCheck, 
+middleware.pwCheck, 
+controller.register)
 
 
 //로그인
-router.post('/login', async (req, res, next) => {
-    const { id, pw } = req.body
-    middleware.idcheck(req, res, next),
-    middleware.sessionCheck,
-    controller.register
-})
+router.post('/login', 
+middleware.sessionCheck, 
+middleware.existCheck,
+middleware.idCheck, 
+middleware.pwCheck, 
+controller.login)
 
-router.post("/login", middleware.sessionCheck, controller.login)
 
 //로그아웃
 router.get("/logout", async (req, res) => {
