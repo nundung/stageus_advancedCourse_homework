@@ -7,7 +7,7 @@ const controller = require("../controllers/accountController")
 const middleware = require("../middlewares/accountMiddleware")
 
 const { body, check} = require("express-validator")
-const validator = require('../middlewares/validator') 
+const validator = require("../middlewares/validator") 
 //Apis
 //회원가입 & 아이디/이메일 중복체크
 router.post(
@@ -27,34 +27,24 @@ router.post(
 
 
 //로그인
-router.post('/login', 
-middleware.sessionCheck, 
-// middleware.existCheck(),
-middleware.idCheck, 
-middleware.pwCheck, 
-controller.login)
+router.post(
+    "/login",
+    middleware.sessionCheck,
+    [
+        check("id").notEmpty(),
+        check("pw").notEmpty()
+    ],
+    validator.validatorErrorChecker,
+    controller.logIn
+)
 
 
 //로그아웃
-router.get("/logout", async (req, res) => {
-    const logOutResult = {
-        "message": ""
-    }
-    try {
-        if (!req.session.user) {
-            const e = new Error("세션에 사용자 정보 없음")
-            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
-            throw e
-        }
-        req.session.destroy() 
-        res.clearCookie('connect.sid')  // 세션 쿠키 삭제
-        res.status(200).send(logOutResult)
-    }
-    catch (e) {
-        logOutResult.message = e.message
-        res.status(400).send(logOutResult)
-    }
-})
+router.get(
+    "/logout",
+    middleware.sessionNotCheck,
+    controller.logOut
+)
 
 //내정보 보기
 router.get("/info", (req, res) => {

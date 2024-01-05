@@ -1,11 +1,13 @@
 const pool = require('../database/postgreSql')
 
+//회원가입
 const register = async (req, res, next) => {
     const {id, pw, name, email} = req.body
     try {
         const sql = "INSERT INTO account (id, pw, name, email) VALUES ($1, $2, $3, $4)" //물음표 여러개면 $1, $2, $3
         const values = [id, pw, name, email]
         await pool.query(sql, values)
+
         res.status(201).send({"message": "Success"})
     }
     catch (err) {
@@ -13,7 +15,8 @@ const register = async (req, res, next) => {
     }
 }
 
-const login = async (req, res, next) => {
+//로그인
+const logIn = async (req, res, next) => {
     const {id, pw} = req.body
     try {
         const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2"   //물음표 여러개면 $1, $2, $3
@@ -42,4 +45,15 @@ const login = async (req, res, next) => {
     }
 }
 
-module.exports = {register, login}
+//로그아웃
+const logOut = async (req, res, next) => {
+    try {
+        req.session.destroy() 
+        res.clearCookie('connect.sid')  // 세션 쿠키 삭제
+        res.status(200).send({"message": "Success"})
+    }
+    catch (err) {
+        next(err)
+    }
+}
+module.exports = {register, logIn, logOut}

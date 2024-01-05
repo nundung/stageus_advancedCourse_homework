@@ -35,6 +35,7 @@ duplicate.emailCheck = async (req, res, next) => {
             e.status = 409         //이미 존재하는 리소스에 대한 중복된 생성 요청
             throw e
         }
+        next()
     }
     catch (err) {
         next(err)

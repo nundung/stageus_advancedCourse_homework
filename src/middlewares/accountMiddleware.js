@@ -4,8 +4,17 @@ const exception = require('../modules/exception')
 const sessionCheck = (req, res, next) => {
     if (req.session.user) {
         const e = new Error("이미 로그인 되어있습니다.")
+        e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
+        throw e
+    }
+    next()
+}
+
+const sessionNotCheck = (req, res, next) => {
+    if (!req.session.user) {
+        const e = new Error("사용자 정보가 존재하지 않습니다.")
         e.status = 403
-        return next(e)
+        throw e
     }
     next()
 }
@@ -47,4 +56,4 @@ const pwCheck = (req, res, next) => {
 
     //("비밀번호는 영문, 숫자, 특수문자의 조합으로 8~20자로 입력해주세요.");
 
-module.exports = { sessionCheck, idCheck, pwCheck }
+module.exports = { sessionCheck, sessionNotCheck, idCheck, pwCheck }
