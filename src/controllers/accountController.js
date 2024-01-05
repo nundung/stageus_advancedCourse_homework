@@ -5,8 +5,7 @@ const register = async (req, res, next) => {
     try {
         const sql = "INSERT INTO account (id, pw, name, email) VALUES ($1, $2, $3, $4)" //물음표 여러개면 $1, $2, $3
         const values = [id, pw, name, email]
-        const data = await pool.query(sql, values)
-
+        await pool.query(sql, values)
         res.status(201).send({"message": "Success"})
     }
     catch (err) {
