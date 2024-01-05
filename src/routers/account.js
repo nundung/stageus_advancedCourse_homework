@@ -14,10 +14,10 @@ router.post(
     "/",
     middleware.sessionCheck,
     [
-        check("id").notEmpty(),
-        check("pw").notEmpty(),
-        check("name").notEmpty(),
-        check("email").notEmpty()
+        check("id").isEmpty().withMessage("아이디를 입력해주세요."),
+        check("pw").isEmpty().withMessage("비밀번호를 입력해주세요."),
+        check("name").isEmpty().withMessage("이름을 입력해주세요."),
+        check("email").isEmpty().withMessage("이메일을 입력해주세요."),
     ],
     validator.validatorErrorChecker,
     duplicate.idCheck,
@@ -31,8 +31,8 @@ router.post(
     "/login",
     middleware.sessionCheck,
     [
-        check("id").notEmpty(),
-        check("pw").notEmpty()
+        check("id").isEmpty(),
+        check("pw").isEmpty()
     ],
     validator.validatorErrorChecker,
     controller.logIn
