@@ -1,25 +1,35 @@
 //Import
 const router = require("express").Router()
-const pool = require('../database/connect')
+const pool = require('../database/postgreSql')
 const exception = require('../modules/exception')
 const duplicate = require('../modules/duplicateCheck')
 const controller = require("../controllers/accountController")
 const middleware = require("../middlewares/accountMiddleware")
 
+const { body, check} = require("express-validator")
+const validator = require('../middlewares/validator') 
 //Apis
 //회원가입 & 아이디/이메일 중복체크
-router.post("/",
-middleware.sessionCheck,
-middleware.existCheck,
-middleware.idCheck, 
-middleware.pwCheck, 
-controller.register)
+router.post(
+    "/",
+    middleware.sessionCheck,
+    [
+        check("id").notEmpty(),
+        check("pw").notEmpty(),
+        check("name").notEmpty(),
+        check("email").notEmpty()
+    ],
+    validator.validatorErrorChecker,
+    duplicate.idCheck,
+    duplicate.emailCheck,
+    controller.register
+)
 
 
 //로그인
 router.post('/login', 
 middleware.sessionCheck, 
-middleware.existCheck,
+// middleware.existCheck(),
 middleware.idCheck, 
 middleware.pwCheck, 
 controller.login)

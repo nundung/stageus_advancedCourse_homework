@@ -28,16 +28,20 @@ app.use("/post", postApi)
 const commentApi = require("./src/routers/comment")
 app.use("/comment", commentApi)
 
-// const errorhandling = require("./src/middlewares/error")
-// app.use(errorhandling)
+const logApi = require('./src/routers/log')
+app.use('/log', logApi)
 
 app.use((err, req, res, next) => {
-    res.status(err.status || 500).json({
+    const statusCode = err.status || 500    // 에러 객체에 status가 없을 경우 기본값으로 500 설정
+    const errorMessage = err.message || '서버 오류가 발생했습니다.';
+
+    res.status(statusCode).json({
         error: {
-            message: err.message || '서버 오류가 발생했습니다.'
+            message: errorMessage
         }
-    });
-});
+    })
+})
+
 //web Server
 app.listen(port, () => {
     console.log(`${port}번에서 HTTP 웹서버 실행`)

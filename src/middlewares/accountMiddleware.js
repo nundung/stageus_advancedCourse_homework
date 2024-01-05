@@ -10,15 +10,15 @@ const sessionCheck = (req, res, next) => {
     next()
 }
 
-const existCheck = (req, res, next) => {
-    const { value } = req.body
-    if(value === null || value === "" || value === undefined) {
-        const e = new Error(`필수값을 모두 입력해주세요`)
-        e.status = 400
-        return next(e)
-    }
-    next()
-}
+// const existCheck = (req, res, next) => {
+//     const { value } = req.body
+//     if(value === null || value === "" || value === undefined) {
+//         const e = new Error("필수값을 모두 입력해주세요.")
+//         e.status = 400
+//         return next(e)
+//     }
+//     next()
+// }
 
 const idCheck = (req, res, next) => {
     const { id } = req.body
@@ -26,7 +26,7 @@ const idCheck = (req, res, next) => {
     if(!idReg.test(id)) {
         const e = new Error("아이디 형식 불일치")
         e.status = 400
-        return next(e)
+        return next(err)
     }
     next()
 }
@@ -40,11 +40,11 @@ const pwCheck = (req, res, next) => {
     if(!pwReg.test(pw)) {
         const e = new Error("비밀번호 형식 불일치")
         e.status = 400
-        return next(e)
+        return next(err)
     }
     next()
 }
 
     //("비밀번호는 영문, 숫자, 특수문자의 조합으로 8~20자로 입력해주세요.");
 
-module.exports = {sessionCheck, idCheck, pwCheck, existCheck}
+module.exports = { sessionCheck, idCheck, pwCheck }
