@@ -5,6 +5,7 @@ const exception = require('../modules/exception')
 const postMid = require("../middlewares/postMid")
 const sessionCheckMid = require("../middlewares/sessionCheckMid")
 const controller = require("../controllers/postController")
+const  { validatorErrorChecker } = require("../middlewares/validatorMid")
 const { check } = require("express-validator")
 
 //Apis
@@ -20,9 +21,10 @@ router.post(
     "/",
     sessionCheckMid.sessionCheck,
     [
-        check("title").notEmpty(),
-        check("content").notEmpty(),
+        check("title").notEmpty().isLength({ min: 1, max: 100 }),
+        check("content").notEmpty().isLength({ min: 1, max: 1000 }),
     ],
+    validatorErrorChecker,
     controller.uploadPost
 )
 
@@ -30,7 +32,7 @@ router.post(
 router.get(
     "/:postidx",
     sessionCheckMid.sessionCheck,
-    controller.post
+    controller.readPost
 )
 
 //게시글 수정
@@ -38,9 +40,10 @@ router.put(
     "/:postidx",
     sessionCheckMid.sessionCheck,
     [
-        check("title").notEmpty(),
-        check("content").notEmpty(),
+        check("title").notEmpty().isLength({ min: 1, max: 100 }),
+        check("content").notEmpty().isLength({ min: 1, max: 1000 }),
     ],
+    validatorErrorChecker,
     controller.editPost
 )
 

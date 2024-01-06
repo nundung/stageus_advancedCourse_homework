@@ -79,13 +79,8 @@ const editInfo = async (req, res, next) => {
 
         const sql = "UPDATE account SET pw=$1, name=$2, email=$3 WHERE idx=$4"   //물음표 여러개면 $1, $2, $3
         const values = [pw, name, email, idx]
-        const data = await pool.query(sql, values)
+        data = await pool.query(sql, values)
 
-        if(data.rowCount === 0) {
-            const e = new Error("DB오류 발생")
-            e.status = 500      
-            throw e
-        }
         req.session.user = {
             ...req.session.user,
             pw: pw,
@@ -106,13 +101,7 @@ const deleteAccount = async (req, res, next) => {
 
         const sql = "DELETE FROM account WHERE idx=$1"
         const values = [idx]
-        const data = await pool.query(sql, values)
-
-        if (data.rowCount === 0) {
-            const e = new Error("DB오류 발생")
-            e.status = 500      
-            throw e
-        }
+        data = await pool.query(sql, values)
 
         req.session.destroy() 
         res.clearCookie('connect.sid')  // 세션 쿠키 삭제

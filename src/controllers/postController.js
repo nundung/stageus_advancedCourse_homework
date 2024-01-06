@@ -45,11 +45,15 @@ const uploadPost = async (req, res, next) => {
 }
 
 //게시글 보기
-const post = async (req, res, next) => {
+const readPost = async (req, res, next) => {
     const postIdx = req.params.postidx
     const result = { "data": null }
     try {
-        const sql = "SELECT account.id, post.* FROM post JOIN account ON post.account_idx = account.idx WHERE post.idx=$1"
+        const sql = 
+        `SELECT account.id, post.*
+        FROM post JOIN account 
+        ON post.account_idx = account.idx
+        WHERE post.idx=$1`
         const values = [postIdx]
         const data = await pool.query(sql, values)
 
@@ -75,13 +79,8 @@ const editPost = async (req, res, next) => {
 
         const sql = "UPDATE post SET title=$1, content=$2 WHERE idx=$3 AND account_idx=$4"
         const values = [title, content, postIdx, idx]
-        const data = await pool.query(sql, values)
+        await pool.query(sql, values)
 
-        if (data.rowCount === 0) {
-            const e = new Error("게시글 수정실패")
-            e.status = 500      
-            throw e
-        }
         res.status(200).send()
     }
     catch (err) {
@@ -97,13 +96,8 @@ const deletePost = async (req, res, next) => {
 
         const sql = "DELETE FROM post WHERE idx=$1 AND account_idx=$2"
         const values = [postIdx, idx]
-        const data = await pool.query(sql, values) 
-        
-        if (data.rowCount === 0) {
-            const e = new Error("게시글 수정실패")
-            e.status = 500      
-            throw e
-        }
+        await pool.query(sql, values) 
+
         res.status(200).send()
     }
     catch (err) {
@@ -111,4 +105,4 @@ const deletePost = async (req, res, next) => {
     }
 }
 
-module.exports = { postList, uploadPost, post, editPost, deletePost }
+module.exports = { postList, uploadPost, readPost, editPost, deletePost }

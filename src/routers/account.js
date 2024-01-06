@@ -1,4 +1,4 @@
-//Import
+ //Import
 const router = require("express").Router()
 const pool = require('../database/postgreSql')
 // const exception = require('../modules/exception')
@@ -24,8 +24,7 @@ router.post(
     duplicate.idCheck,
     duplicate.emailCheck,
     controller.register
-)
-
+) 
 
 //로그인
 router.post(
