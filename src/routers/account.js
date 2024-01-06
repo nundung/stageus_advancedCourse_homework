@@ -5,21 +5,21 @@ const exception = require('../modules/exception')
 const duplicate = require('../modules/duplicateCheck')
 const controller = require("../controllers/accountController")
 const middleware = require("../middlewares/accountMiddleware")
-
+const  { validatorErrorChecker } = require("../middlewares/validator")
 const { body, check} = require("express-validator")
-const validator = require("../middlewares/validator") 
+
 //Apis
 //회원가입 & 아이디/이메일 중복체크
 router.post(
     "/",
     middleware.sessionCheck,
     [
-        check("id").isEmpty().withMessage("아이디를 입력해주세요."),
-        check("pw").isEmpty().withMessage("비밀번호를 입력해주세요."),
-        check("name").isEmpty().withMessage("이름을 입력해주세요."),
-        check("email").isEmpty().withMessage("이메일을 입력해주세요."),
+        body("id").notEmpty().isLength({ min: 6, max: 18 }),
+        body("pw").notEmpty().isLength({ min: 8, max: 20 }),
+        body("name").notEmpty().isLength({ min: 2, max: 4 }),
+        check("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
     ],
-    validator.validatorErrorChecker,
+    validatorErrorChecker,
     duplicate.idCheck,
     duplicate.emailCheck,
     controller.register
@@ -31,10 +31,10 @@ router.post(
     "/login",
     middleware.sessionCheck,
     [
-        check("id").isEmpty(),
-        check("pw").isEmpty()
+        body("id").notEmpty().isLength({ min: 6, max: 18 }),
+        body("pw").notEmpty().isLength({ min: 8, max: 20 }),
     ],
-    validator.validatorErrorChecker,
+    validatorErrorChecker,
     controller.logIn
 )
 
@@ -47,72 +47,25 @@ router.get(
 )
 
 //내정보 보기
-router.get("/info", (req, res) => {
-    const infoResult = {
-        "message": "",
-        "data": null
-    }
-    try {
-        if (!req.session.user) {
-            const e = new Error("세션에 사용자 정보 없음")
-            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
-            throw e
-        }
-        const { id, pw, name, email } = req.session.user
-        infoResult.data = {id, pw, name, email}
-        res.status(200).send(infoResult)
-    }
-    catch (e) {
-        infoResult.message = e.message
-        res.status(400).send(infoResult)
-    }
-})
+router.get(
+    "/info",
+    middleware.sessionNotCheck,
+    controller.info
+    )
 
 //내정보 수정
-router.put("/info", async (req, res) => {
-    const {pw, name, email} = req.body
-    const editInfoResult = {
-        "message": ""
-    }
-    try {
-        if (!req.session.user) {
-            const e = new Error("세션에 사용자 정보 없음")
-            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
-            throw e
-        }
-        const idx = req.session.user.idx
-        const currentemail = req.session.user.email
-        exception.pwCheck(pw)
-        exception.nameCheck(name)
-        exception.emailCheck(email)
-
-        //이메일 중복체크
-        //이메일이 바뀌었을 때만 실행
-        if (currentemail !== email) {
-            console.log(currentemail, email)
-            await duplicate.emailCheck(email)
-        }
-
-        const sql = "UPDATE account SET pw=$1, name=$2, email=$3 WHERE idx=$4"   //물음표 여러개면 $1, $2, $3
-        const values = [pw, name, email, idx]
-        const data = await pool.query(sql, values)
-
-        if(data.rowCount === 0) throw new Error("정보수정 실패")
-        req.session.user = {
-            ...req.session.user,
-            pw: pw,
-            name: name,
-            email: email
-        }
-        editInfoResult.message = "정보수정이 완료되었습니다."
-    
-        res.status(200).send(editInfoResult)
-    }
-    catch (e) {
-        editInfoResult.message = e.message
-        res.status(400).send(editInfoResult)
-    }
-})
+router.put(
+    "/info",
+    middleware.sessionNotCheck,
+    [
+        body("pw").notEmpty().isLength({ min: 8, max: 20 }),
+        body("name").notEmpty().isLength({ min: 2, max: 4 }),
+        check("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
+    ],
+    validatorErrorChecker,
+    middleware.emailChangeCheck,
+    controller.editInfo
+)
 
 //계정 삭제
 router.delete("/", async (req, res) => {

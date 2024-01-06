@@ -1,4 +1,5 @@
 const pool = require('../database/postgreSql')
+const duplicate = require('../modules/duplicateCheck')
 
 //회원가입
 const register = async (req, res, next) => {
@@ -17,6 +18,7 @@ const register = async (req, res, next) => {
 
 //로그인
 const logIn = async (req, res, next) => {
+    console.log("실행")
     const {id, pw} = req.body
     try {
         const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2"   //물음표 여러개면 $1, $2, $3
@@ -47,13 +49,59 @@ const logIn = async (req, res, next) => {
 
 //로그아웃
 const logOut = async (req, res, next) => {
+    const result = {}
     try {
         req.session.destroy() 
         res.clearCookie('connect.sid')  // 세션 쿠키 삭제
-        res.status(200).send({"message": "Success"})
+        res.status(200).send(result)
     }
     catch (err) {
         next(err)
     }
 }
-module.exports = {register, logIn, logOut}
+
+//내정보 보기
+const info = (req, res, next) => {
+    const result = {
+        "data": null
+    }
+    try {
+        const { id, pw, name, email } = req.session.user
+        result.data = {id, pw, name, email}
+        res.status(200).send(result)
+    }
+    catch (err) {
+        next(err)
+    }
+}
+
+//내정보 수정
+const editInfo = async (req, res, next) => {
+    const result = {}
+    const {pw, name, email} = req.body
+    try {
+        const idx = req.session.user.idx
+
+        const sql = "UPDATE account SET pw=$1, name=$2, email=$3 WHERE idx=$4"   //물음표 여러개면 $1, $2, $3
+        const values = [pw, name, email, idx]
+        const data = await pool.query(sql, values)
+
+        if(data.rowCount === 0) {
+            const e = new Error("DB오류 발생")
+            e.status = 500      
+            throw e
+        }
+        req.session.user = {
+            ...req.session.user,
+            pw: pw,
+            name: name,
+            email: email
+        }
+        res.status(200).send(result)
+    }
+    catch (err) {
+        next(err)
+    }
+}
+
+module.exports = {register, logIn, logOut, info, editInfo}

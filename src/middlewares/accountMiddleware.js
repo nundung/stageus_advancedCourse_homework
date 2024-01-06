@@ -1,5 +1,6 @@
 
 const exception = require('../modules/exception')
+const duplicate = require('../modules/duplicateCheck')
 
 const sessionCheck = (req, res, next) => {
     if (req.session.user) {
@@ -56,4 +57,18 @@ const pwCheck = (req, res, next) => {
 
     //("비밀번호는 영문, 숫자, 특수문자의 조합으로 8~20자로 입력해주세요.");
 
-module.exports = { sessionCheck, sessionNotCheck, idCheck, pwCheck }
+    const emailChangeCheck = async (req, res, next) => {
+        const newEmail = req.body.email
+        const currentEmail = req.session.user.email
+    
+        if (newEmail !== currentEmail) {
+            try {
+                await duplicate.emailCheck(req, res, next);
+            } catch (err) {
+                return next(err);
+            }
+        }
+        next();
+    };
+
+module.exports = { sessionCheck, sessionNotCheck, idCheck, pwCheck, emailChangeCheck }
