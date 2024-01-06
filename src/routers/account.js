@@ -7,7 +7,7 @@ const controller = require("../controllers/accountController")
 const accountMid = require("../middlewares/accountMid")
 const sessionCheckMid = require("../middlewares/sessionCheckMid")
 const  { validatorErrorChecker } = require("../middlewares/validatorMid")
-const { body, check} = require("express-validator")
+const { check } = require("express-validator")
 
 //Apis
 //회원가입 & 아이디/이메일 중복체크
@@ -15,9 +15,9 @@ router.post(
     "/",
     sessionCheckMid.sessionNotCheck,
     [
-        body("id").notEmpty().isLength({ min: 6, max: 18 }),
-        body("pw").notEmpty().isLength({ min: 8, max: 20 }),
-        body("name").notEmpty().isLength({ min: 2, max: 4 }),
+        check("id").notEmpty().isLength({ min: 6, max: 18 }),
+        check("pw").notEmpty().isLength({ min: 8, max: 20 }),
+        check("name").notEmpty().isLength({ min: 2, max: 4 }),
         check("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
     ],
     validatorErrorChecker,
@@ -32,8 +32,8 @@ router.post(
     "/login",
     sessionCheckMid.sessionNotCheck,
     [
-        body("id").notEmpty().isLength({ min: 6, max: 18 }),
-        body("pw").notEmpty().isLength({ min: 8, max: 20 }),
+        check("id").notEmpty().isLength({ min: 6, max: 18 }),
+        check("pw").notEmpty().isLength({ min: 8, max: 20 }),
     ],
     validatorErrorChecker,
     controller.logIn
@@ -59,8 +59,8 @@ router.put(
     "/info",
     sessionCheckMid.sessionCheck,
     [
-        body("pw").notEmpty().isLength({ min: 8, max: 20 }),
-        body("name").notEmpty().isLength({ min: 2, max: 4 }),
+        check("pw").notEmpty().isLength({ min: 8, max: 20 }),
+        check("name").notEmpty().isLength({ min: 2, max: 4 }),
         check("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
     ],
     validatorErrorChecker,

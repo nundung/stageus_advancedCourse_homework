@@ -3,13 +3,13 @@ const duplicate = require('../modules/duplicateCheck')
 
 //회원가입
 const register = async (req, res, next) => {
-    const {id, pw, name, email} = req.body
+    const { id, pw, name, email } = req.body
     try {
         const sql = "INSERT INTO account (id, pw, name, email) VALUES ($1, $2, $3, $4)" //물음표 여러개면 $1, $2, $3
         const values = [id, pw, name, email]
         await pool.query(sql, values)
 
-        res.status(201).send({"message": "Success"})
+        res.status(201).send()
     }
     catch (err) {
         next(err)
@@ -18,8 +18,7 @@ const register = async (req, res, next) => {
 
 //로그인
 const logIn = async (req, res, next) => {
-    console.log("실행")
-    const {id, pw} = req.body
+    const { id, pw } = req.body
     try {
         const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2"   //물음표 여러개면 $1, $2, $3
         const values = [id, pw]
@@ -40,7 +39,7 @@ const logIn = async (req, res, next) => {
             email: data.rows[0].email
         }
         console.log(req.session.user.idx)
-        res.status(200).send({"message": "Success"})
+        res.status(200).send()
     }
     catch (err) {
         next(err)
@@ -49,11 +48,10 @@ const logIn = async (req, res, next) => {
 
 //로그아웃
 const logOut = async (req, res, next) => {
-    const result = {}
     try {
         req.session.destroy() 
         res.clearCookie('connect.sid')  // 세션 쿠키 삭제
-        res.status(200).send(result)
+        res.status(200).send()
     }
     catch (err) {
         next(err)
@@ -62,9 +60,7 @@ const logOut = async (req, res, next) => {
 
 //내정보 보기
 const info = (req, res, next) => {
-    const result = {
-        "data": null
-    }
+    const result = { "data": null }
     try {
         const { id, pw, name, email } = req.session.user
         result.data = {id, pw, name, email}
@@ -77,7 +73,6 @@ const info = (req, res, next) => {
 
 //내정보 수정
 const editInfo = async (req, res, next) => {
-    const result = {}
     const {pw, name, email} = req.body
     try {
         const idx = req.session.user.idx
@@ -97,7 +92,7 @@ const editInfo = async (req, res, next) => {
             name: name,
             email: email
         }
-        res.status(200).send(result)
+        res.status(200).send()
     }
     catch (err) {
         next(err)
@@ -106,7 +101,6 @@ const editInfo = async (req, res, next) => {
 
 //계정 삭제
 const deleteAccount = async (req, res, next) => {
-    const result = {}
     try {
         const idx = req.session.user.idx;
 
@@ -123,7 +117,7 @@ const deleteAccount = async (req, res, next) => {
         req.session.destroy() 
         res.clearCookie('connect.sid')  // 세션 쿠키 삭제
 
-        res.status(200).send(result)
+        res.status(200).send()
     }
     catch (err) {
         next(err)
