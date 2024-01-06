@@ -4,15 +4,15 @@ const pool = require('../database/postgreSql')
 const exception = require('../modules/exception')
 const duplicate = require('../modules/duplicateCheck')
 const controller = require("../controllers/accountController")
-const middleware = require("../middlewares/accountMiddleware")
-const  { validatorErrorChecker } = require("../middlewares/validator")
+const middleware = require("../middlewares/accountMid")
+const  { validatorErrorChecker } = require("../middlewares/validatorMid")
 const { body, check} = require("express-validator")
 
 //Apis
 //회원가입 & 아이디/이메일 중복체크
 router.post(
     "/",
-    middleware.sessionCheck,
+    middleware.sessionNotCheck,
     [
         body("id").notEmpty().isLength({ min: 6, max: 18 }),
         body("pw").notEmpty().isLength({ min: 8, max: 20 }),
@@ -29,7 +29,7 @@ router.post(
 //로그인
 router.post(
     "/login",
-    middleware.sessionCheck,
+    middleware.sessionNotCheck,
     [
         body("id").notEmpty().isLength({ min: 6, max: 18 }),
         body("pw").notEmpty().isLength({ min: 8, max: 20 }),
@@ -42,21 +42,21 @@ router.post(
 //로그아웃
 router.get(
     "/logout",
-    middleware.sessionNotCheck,
+    middleware.sessionCheck,
     controller.logOut
 )
 
 //내정보 보기
 router.get(
     "/info",
-    middleware.sessionNotCheck,
+    middleware.sessionCheck,
     controller.info
     )
 
 //내정보 수정
 router.put(
     "/info",
-    middleware.sessionNotCheck,
+    middleware.sessionCheck,
     [
         body("pw").notEmpty().isLength({ min: 8, max: 20 }),
         body("name").notEmpty().isLength({ min: 2, max: 4 }),
@@ -68,36 +68,11 @@ router.put(
 )
 
 //계정 삭제
-router.delete("/", async (req, res) => {
-    const deleteAccountResult = {
-        "message": ""
-    }
-    try {
-        if (!req.session.user) {
-            const e = new Error("세션에 사용자 정보 없음")
-            e.status = 401     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.
-            throw e
-        }
-        const idx = req.session.user.idx;
-
-        const sql = "DELETE FROM account WHERE idx=$1"
-        const values = [idx]
-        const data = await pool.query(sql, values)
-
-        if (data.rowCount === 0) throw new Error ("회원탈퇴 실패")
-
-        req.session.destroy() 
-        res.clearCookie('connect.sid')  // 세션 쿠키 삭제
-
-        deleteAccountResult.message = "회원탈퇴가 완료되었습니다."
-        res.status(200).send(deleteAccountResult)
-        
-    }
-    catch (e) {
-        deleteAccountResult.message = e.message
-        res.status(400).send(deleteAccountResult)
-    }
-})
+router.delete(
+    "/",
+    middleware.sessionCheck,
+    controller.deleteAccount
+)
 
 
 module.exports = router

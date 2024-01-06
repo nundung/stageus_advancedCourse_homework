@@ -104,4 +104,30 @@ const editInfo = async (req, res, next) => {
     }
 }
 
-module.exports = {register, logIn, logOut, info, editInfo}
+//계정 삭제
+const deleteAccount = async (req, res, next) => {
+    const result = {}
+    try {
+        const idx = req.session.user.idx;
+
+        const sql = "DELETE FROM account WHERE idx=$1"
+        const values = [idx]
+        const data = await pool.query(sql, values)
+
+        if (data.rowCount === 0) {
+            const e = new Error("DB오류 발생")
+            e.status = 500      
+            throw e
+        }
+
+        req.session.destroy() 
+        res.clearCookie('connect.sid')  // 세션 쿠키 삭제
+
+        res.status(200).send(result)
+    }
+    catch (err) {
+        next(err)
+    }
+}
+
+module.exports = { register, logIn, logOut, info, editInfo, deleteAccount }
