@@ -2,10 +2,12 @@
 const router = require("express").Router()
 const pool = require('../database/postgreSql')
 const exception = require('../modules/exception')
-
+const middleware = require("../middlewares/postMid")
 //Apis
 //게시물 목록(게시판)
-router.get("/", async (req, res) => {
+router.get("/",
+
+async (req, res) => {
     const postBoardResult = {
         "message": "",
         "data": null

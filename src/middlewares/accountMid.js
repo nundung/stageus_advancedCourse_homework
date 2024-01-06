@@ -55,20 +55,20 @@ const pwCheck = (req, res, next) => {
     next()
 }
 
-    //("비밀번호는 영문, 숫자, 특수문자의 조합으로 8~20자로 입력해주세요.");
+//("비밀번호는 영문, 숫자, 특수문자의 조합으로 8~20자로 입력해주세요.");
 
-    const emailChangeCheck = async (req, res, next) => {
-        const newEmail = req.body.email
+const emailChangeCheck = async (req, res, next) => {
+    const newEmail = req.body.email
+    try {
         const currentEmail = req.session.user.email
-    
         if (newEmail !== currentEmail) {
-            try {
-                await duplicate.emailCheck(req, res, next);
-            } catch (err) {
-                return next(err);
-            }
+            await duplicate.emailCheck(req, res, next);
         }
-        next();
-    };
+        next()
+    }
+    catch (err) {
+        return next(err)
+    }
+}
 
 module.exports = { sessionCheck, sessionNotCheck, idCheck, pwCheck, emailChangeCheck }
