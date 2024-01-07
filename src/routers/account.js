@@ -1,7 +1,5 @@
- //Import
+//Import
 const router = require("express").Router()
-const pool = require('../database/postgreSql')
-// const exception = require('../modules/exception')
 const duplicate = require('../modules/duplicateCheck')
 const controller = require("../controllers/accountController")
 const accountMid = require("../middlewares/accountMid")

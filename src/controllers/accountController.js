@@ -36,7 +36,8 @@ const logIn = async (req, res, next) => {
             id: data.rows[0].id,
             pw: data.rows[0].pw,
             name: data.rows[0].name,
-            email: data.rows[0].email
+            email: data.rows[0].email,
+            is_admin: data.rows[0].is_admin
         }
         console.log(req.session.user.idx)
         res.status(200).send()

@@ -8,7 +8,7 @@ mongoose.connect('mongodb://localhost:27017/15weekhomework', {
 })
 
 // 연결 실패 시 에러 처리
-mongoose.connection.on('error', console.error.bind(console, 'MongoDB 연결 오류:'));
+mongoose.connection.on('error', console.error.bind(console, 'MongoDB 연결 오류:'))
 
 // 연결 성공 시 메시지 출력
 mongoose.connection.once('open', () => {
@@ -16,7 +16,7 @@ mongoose.connection.once('open', () => {
 })
 
 // 로그용 스키마 정의
-const log = new Schema({
+const logSchema = new Schema({
     ip: { type: String, required: true },
     id: { type: String, required: false },
     url: { type: String, required: true },
@@ -28,6 +28,6 @@ const log = new Schema({
 })
 
 // 로그 모델 생성
-const logModel = mongoose.model('LogModel', log)
+const logModel = mongoose.model('LogModel', logSchema)
 
 module.exports = { logModel }

@@ -1,8 +1,17 @@
 // Import
 const express = require("express")
 const session = require("express-session")
+const debug = require('debug')('express-test:server')
+//const logger = require('morgan')
 const FileStore = require("session-file-store")(session)
+
 require('dotenv').config()
+
+// 개발환경에서 자세한 로그를 콘솔에 출력
+if (process.env.NODE_ENV === 'development') {
+    app.use(logger('dev'));
+}
+
 
 // Init
 const app = express()
@@ -19,6 +28,9 @@ app.use(session({
 
 //Apis
 
+const logApi = require("./src/middlewares/logMid")
+app.use("/*", logApi)
+
 const accountApi = require("./src/routers/account")
 app.use("/account", accountApi)
 
@@ -28,8 +40,8 @@ app.use("/post", postApi)
 const commentApi = require("./src/routers/comment")
 app.use("/comment", commentApi)
 
-const logApi = require('./src/routers/log')
-app.use('/log', logApi)
+const managerApi = require("./src/routers/manager")
+app.use("/manager", managerApi)
 
 app.use((err, req, res, next) => {
     const statusCode = err.status || 500    // 에러 객체에 status가 없을 경우 기본값으로 500 설정
