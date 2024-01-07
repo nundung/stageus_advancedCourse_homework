@@ -1,19 +1,10 @@
-// Import
+//Import
 const express = require("express")
 const session = require("express-session")
-const debug = require('debug')('express-test:server')
-//const logger = require('morgan')
 const FileStore = require("session-file-store")(session)
-
 require('dotenv').config()
 
-// 개발환경에서 자세한 로그를 콘솔에 출력
-if (process.env.NODE_ENV === 'development') {
-    app.use(logger('dev'));
-}
-
-
-// Init
+//Init
 const app = express()
 const port = 8000
 app.use(express.json()) //보낼 json을 자동으로 string으로 변환 / 받은 string을
@@ -27,9 +18,9 @@ app.use(session({
 }))
 
 //Apis
+const { logging } = require("./src/middlewares/logMid")
 
-const logApi = require("./src/middlewares/logMid")
-app.use("/*", logApi)
+app.use(logging)
 
 const accountApi = require("./src/routers/account")
 app.use("/account", accountApi)

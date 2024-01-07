@@ -1,6 +1,5 @@
 //Import
 const router = require("express").Router()
-const duplicate = require('../modules/duplicateCheck')
 const controller = require("../controllers/accountController")
 const accountMid = require("../middlewares/accountMid")
 const sessionCheckMid = require("../middlewares/sessionCheckMid")
@@ -19,8 +18,6 @@ router.post(
         check("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
     ],
     validatorErrorChecker,
-    duplicate.idCheck,
-    duplicate.emailCheck,
     controller.register
 ) 
 

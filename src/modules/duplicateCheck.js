@@ -1,4 +1,4 @@
-// import dl
+// import
 const client = require('../database/postgreSql')
 const duplicate = {}
 
