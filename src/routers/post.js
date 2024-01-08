@@ -1,8 +1,5 @@
 //Import
 const router = require("express").Router()
-const pool = require('../database/postgreSql')
-const exception = require('../modules/exception')
-const postMid = require("../middlewares/postMid")
 const sessionCheckMid = require("../middlewares/sessionCheckMid")
 const controller = require("../controllers/postController")
 const  { validatorErrorChecker } = require("../middlewares/validatorMid")

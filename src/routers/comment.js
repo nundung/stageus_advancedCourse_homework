@@ -1,7 +1,5 @@
 //Import
 const router = require("express").Router()
-const pool = require("../database/postgreSql")
-const exception = require("../modules/exception")
 const sessionCheckMid = require("../middlewares/sessionCheckMid")
 const controller = require("../controllers/commentController")
 const  { validatorErrorChecker } = require("../middlewares/validatorMid")
@@ -32,7 +30,7 @@ router.put(
     check("comment").notEmpty().isLength({min: 1, max: 200}),
     validatorErrorChecker,
     controller.editComment
-    )
+)
 
 //댓글 삭제
 router.delete(

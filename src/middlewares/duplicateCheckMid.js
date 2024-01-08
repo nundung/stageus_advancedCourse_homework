@@ -1,10 +1,10 @@
 // import
 const client = require('../database/postgreSql')
-const duplicate = {}
 
 //아이디 중복체크
-duplicate.idCheck = async (req, res, next) => {
+const idCheck = async (req, res, next) => {
     try {
+        console.kog("실행")
         const id = req.body.id
         const sql = "SELECT * FROM account WHERE id=$1" //물음표 여러개면 $1, $2, $3
         const values = [id]
@@ -23,7 +23,7 @@ duplicate.idCheck = async (req, res, next) => {
 }
 
 //이메일 중복체크
-duplicate.emailCheck = async (req, res, next) => {
+const emailCheck = async (req, res, next) => {
     try {
         const email = req.body.email
         const sql = "SELECT * FROM account WHERE email=$1" //물음표 여러개면 $1, $2, $3
@@ -42,4 +42,4 @@ duplicate.emailCheck = async (req, res, next) => {
     }
 }
 
-module.exports = duplicate;
+module.exports = { idCheck, emailCheck }

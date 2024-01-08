@@ -1,9 +1,9 @@
 //Import
-const router = require("express").Router()
 const { logModel } = require("../database/mongoDb")
 
 // 미들웨어 함수를 사용하여 API 호출 로깅
 router.use("/", async (req, res, next) => {
+    
     // 여기서 logModel을 사용하여 로그를 MongoDB에 저장하는 작업을 수행
     const logData = {
         ip: req.ip,

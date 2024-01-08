@@ -1,5 +1,5 @@
 //Import
-const duplicate = require('../modules/duplicateCheck')
+const duplicate = require('./duplicateCheckMid')
 
 const idCheck = (req, res, next) => {
     const { id } = req.body
@@ -31,7 +31,7 @@ const emailChangeCheck = async (req, res, next) => {
     try {
         const currentEmail = req.session.user.email
         if (newEmail !== currentEmail) {
-            await duplicate.emailCheck(req, res, next);
+            duplicate.emailCheck
         }
         next()
     }
@@ -39,5 +39,4 @@ const emailChangeCheck = async (req, res, next) => {
         return next(err)
     }
 }
-
 module.exports = { idCheck, pwCheck, emailChangeCheck }

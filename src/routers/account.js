@@ -3,6 +3,7 @@ const router = require("express").Router()
 const controller = require("../controllers/accountController")
 const accountMid = require("../middlewares/accountMid")
 const sessionCheckMid = require("../middlewares/sessionCheckMid")
+const duplicateMid = require('../middlewares/duplicateCheckMid')
 const  { validatorErrorChecker } = require("../middlewares/validatorMid")
 const { check } = require("express-validator")
 
@@ -17,6 +18,8 @@ router.post(
         check("name").notEmpty().isLength({ min: 2, max: 4 }),
         check("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
     ],
+    duplicateMid.idCheck,
+    duplicateMid.emailCheck,
     validatorErrorChecker,
     controller.register
 ) 
@@ -32,7 +35,6 @@ router.post(
     validatorErrorChecker,
     controller.logIn
 )
-
 
 //로그아웃
 router.get(

@@ -19,9 +19,10 @@ const logging = async (req, res, next) => {
         try {
             const log = await logModel.create(logData)
             console.log('로그가 성공적으로 저장되었습니다:', log)
+            next()
         }
         catch (err) {
-            console.log("오류")
+            console.log("오류", err)
             next (err)
         }
     })
