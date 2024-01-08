@@ -1,4 +1,4 @@
-const pool = require("../database/postgreSql")
+const pool = require("../databases/postgreSql")
 
 //댓글 업로드
 const uploadComment = async (req, res, next) => {

@@ -2,10 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 // MongoDB 서버 연결 설정
-mongoose.connect('mongodb://localhost:27017/15weekhomework', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect('mongodb://localhost:27017/15weekhomework')
 
 // 연결 실패 시 에러 처리
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB 연결 오류:'))

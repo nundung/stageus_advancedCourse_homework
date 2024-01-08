@@ -1,6 +1,6 @@
 //Import
 const router = require("express").Router()
-const { logModel } = require("../database/mongoDb")
+const { logModel } = require("../databases/mongoDb")
 
 
 //관리자 페이지

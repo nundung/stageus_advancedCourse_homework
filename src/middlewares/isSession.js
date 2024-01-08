@@ -1,5 +1,5 @@
 
-const sessionCheck = (req, res, next) => {
+const isSession = (req, res, next) => {
     if (!req.session.user) {
         const e = new Error("사용자 정보가 존재하지 않습니다.")
         e.status = 401
@@ -8,7 +8,7 @@ const sessionCheck = (req, res, next) => {
     next()
 }
 
-const sessionNotCheck = (req, res, next) => {
+const isNotSession = (req, res, next) => {
     console.log("실행중")
     if (req.session.user) {
         const e = new Error("이미 로그인 되어있습니다.")
@@ -18,4 +18,4 @@ const sessionNotCheck = (req, res, next) => {
     next()
 }
 
-module.exports = { sessionCheck, sessionNotCheck }
+module.exports = { isSession, isNotSession }

@@ -1,33 +1,34 @@
 //Import
 const router = require("express").Router()
-const controller = require("../controllers/accountController")
-const accountMid = require("../middlewares/accountMid")
-const sessionCheckMid = require("../middlewares/sessionCheckMid")
-const duplicateMid = require('../middlewares/duplicateCheckMid')
-const  { validatorErrorChecker } = require("../middlewares/validatorMid")
 const { check } = require("express-validator")
+const { isSession, isNotSession } = require("../middlewares/isSession")
+const { validatorErrorChecker }  = require("../middlewares/validationHandler")
+const { idCheck, emailCheck, phonenumberCheck } = require('../middlewares/isDuplicate')
+const controller = require("../controllers/accountController")
 
 //Apis
 //회원가입 & 아이디/이메일 중복체크
 router.post(
     "/",
-    sessionCheckMid.sessionNotCheck,
+    isNotSession,
     [
         check("id").notEmpty().isLength({ min: 6, max: 18 }),
         check("pw").notEmpty().isLength({ min: 8, max: 20 }),
         check("name").notEmpty().isLength({ min: 2, max: 4 }),
+        check("phonenumber").notEmpty().isLength({ min: 11, max: 13 }),
         check("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
     ],
-    duplicateMid.idCheck,
-    duplicateMid.emailCheck,
     validatorErrorChecker,
+    idCheck,
+    phonenumberCheck,
+    emailCheck,
     controller.register
 ) 
 
 //로그인
 router.post(
     "/login",
-    sessionCheckMid.sessionNotCheck,
+    isNotSession,
     [
         check("id").notEmpty().isLength({ min: 6, max: 18 }),
         check("pw").notEmpty().isLength({ min: 8, max: 20 }),
@@ -39,35 +40,34 @@ router.post(
 //로그아웃
 router.get(
     "/logout",
-    sessionCheckMid.sessionCheck,
+    isSession,
     controller.logOut
 )
 
 //내정보 보기
 router.get(
     "/info",
-    sessionCheckMid.sessionCheck,
+    isSession,
     controller.info
     )
 
 //내정보 수정
 router.put(
     "/info",
-    sessionCheckMid.sessionCheck,
+    isSession,
     [
         check("pw").notEmpty().isLength({ min: 8, max: 20 }),
         check("name").notEmpty().isLength({ min: 2, max: 4 }),
         check("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
     ],
     validatorErrorChecker,
-    accountMid.emailChangeCheck,
     controller.editInfo
 )
 
 //계정 삭제
 router.delete(
     "/",
-    sessionCheckMid.sessionCheck,
+    isSession,
     controller.deleteAccount
 )
 

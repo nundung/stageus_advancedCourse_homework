@@ -1,22 +1,22 @@
 //Import
 const router = require("express").Router()
-const sessionCheckMid = require("../middlewares/sessionCheckMid")
+const { isSession } = require("../middlewares/isSession")
 const controller = require("../controllers/postController")
-const  { validatorErrorChecker } = require("../middlewares/validatorMid")
+const { validatorErrorChecker }  = require("../middlewares/validationHandler")
 const { check } = require("express-validator")
 
 //Apis
 //게시물 목록(게시판)
 router.get(
     "/",
-    sessionCheckMid.sessionCheck,
+    isSession,
     controller.postList
 )
 
 //게시글 업로드
 router.post(
     "/",
-    sessionCheckMid.sessionCheck,
+    isSession,
     [
         check("title").notEmpty().isLength({ min: 1, max: 100 }),
         check("content").notEmpty().isLength({ min: 1, max: 1000 }),
@@ -28,14 +28,14 @@ router.post(
 //게시글 보기
 router.get(
     "/:postidx",
-    sessionCheckMid.sessionCheck,
+    isSession,
     controller.readPost
 )
 
 //게시글 수정
 router.put(
     "/:postidx",
-    sessionCheckMid.sessionCheck,
+    isSession,
     [
         check("title").notEmpty().isLength({ min: 1, max: 100 }),
         check("content").notEmpty().isLength({ min: 1, max: 1000 }),
@@ -48,7 +48,7 @@ router.put(
 //게시글 삭제
 router.delete(
     "/:postidx",
-    sessionCheckMid.sessionCheck,
+    isSession,
     controller.deletePost
 )
 

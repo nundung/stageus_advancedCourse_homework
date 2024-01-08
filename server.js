@@ -1,6 +1,7 @@
 //Import
 const express = require("express")
 const session = require("express-session")
+// const debug = require('debug')
 const FileStore = require("session-file-store")(session)
 require('dotenv').config()
 
@@ -18,15 +19,15 @@ app.use(session({
 }))
 
 //Apis
-const { logging } = require("./src/middlewares/logMid")
 
-app.use(logging)
+const { log } = require("./src/middlewares/log")
+app.use(log)
 
 const accountApi = require("./src/routers/account")
 app.use("/account", accountApi)
 
 const postApi = require("./src/routers/post")
-app.use("/post", postApi)
+app.use("/post", postApi, )
 
 const commentApi = require("./src/routers/comment")
 app.use("/comment", commentApi)
@@ -34,16 +35,8 @@ app.use("/comment", commentApi)
 const managerApi = require("./src/routers/manager")
 app.use("/manager", managerApi)
 
-app.use((err, req, res, next) => {
-    const statusCode = err.status || 500    // 에러 객체에 status가 없을 경우 기본값으로 500 설정
-    const errorMessage = err.message || '서버 오류가 발생했습니다.';
-
-    res.status(statusCode).json({
-        error: {
-            message: errorMessage
-        }
-    })
-})
+const { errorHandling } = require("./src/middlewares/errorHandling")
+app.use(errorHandling)
 
 //web Server
 app.listen(port, () => {

@@ -1,11 +1,12 @@
-const pool = require('../database/postgreSql')
+const pool = require('../databases/postgreSql')
+const { phonenumberCheck } = require('../middlewares/regulationCheck')
 
 //회원가입
 const register = async (req, res, next) => {
-    const { id, pw, name, email } = req.body
+    const { id, pw, name, email, phonenumber } = req.body
     try {
-        const sql = "INSERT INTO account (id, pw, name, email) VALUES ($1, $2, $3, $4)" //물음표 여러개면 $1, $2, $3
-        const values = [id, pw, name, email]
+        const sql = "INSERT INTO account (id, pw, name, email,phonenumber) VALUES ($1, $2, $3, $4, $5)" //물음표 여러개면 $1, $2, $3
+        const values = [id, pw, name, email, phonenumber ]
         await pool.query(sql, values)
 
         res.status(201).send()
@@ -75,6 +76,20 @@ const info = (req, res, next) => {
 //내정보 수정
 const editInfo = async (req, res, next) => {
     const {pw, name, email} = req.body
+
+    const emailChangeCheck = async (req, res, next) => {
+        const newEmail = req.body.email
+        try {
+            const currentEmail = req.session.user.email
+            if (newEmail !== currentEmail) {
+                duplicate.emailCheck
+            }
+            next()
+        }
+        catch (err) {
+            return next(err)
+        }
+    }
     try {
         const idx = req.session.user.idx
 
