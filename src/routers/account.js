@@ -13,23 +13,25 @@ router.post(
     "/",
     isNotSession,
     [
-        body("id").notEmpty().withMessage("아이디값 없음").
-        if(body("pw").notEmpty()).
+        body("id").notEmpty().withMessage("아이디 없음").
+        if(body("id").notEmpty()).
         custom((id) => validateId(id)).withMessage("유효하지 않은 아이디"),
 
-        body("pw").notEmpty().withMessage("비밀번호값 없음").
+        body("pw").notEmpty().withMessage("비밀번호 없음").
         if(body("pw").notEmpty()).
         custom((pw) => validatePw(pw)).withMessage("유효하지 않은 비밀번호"),
 
-        body("name").notEmpty().withMessage("이름값 없음").
+        body("name").notEmpty().withMessage("이름 없음").
         if(body("name").notEmpty()).
         custom((name) => validateName(name)).withMessage("유효하지 않은 이름"),
 
-        body("phonenumber").notEmpty().withMessage("전화번호값 없음").
+        body("phonenumber").notEmpty().withMessage("전화번호 없음").
         if(body("phonenumber").notEmpty()).
         custom((phonenumber) => validatePhonenumber(phonenumber)).withMessage("유효하지 않은 전화번호"),
 
-        body("email").if(body("email").notEmpty()).isEmail().withMessage("유효하지 않은 이메일")
+        body("email").notEmpty().withMessage("이메일 없음").
+        if(body("email").notEmpty()).
+        isEmail().withMessage("유효하지 않은 이메일")
     ],
     validatorErrorChecker,
     isDuplicate.id,
@@ -43,8 +45,13 @@ router.post(
     "/login",
     isNotSession,
     [
-        body("id").notEmpty().isLength({ min: 6, max: 18 }),
-        body("pw").notEmpty().isLength({ min: 8, max: 20 }),
+        body("id").notEmpty().withMessage("아이디값 없음").
+        if(body("id").notEmpty()).
+        custom((id) => validateId(id)).withMessage("유효하지 않은 아이디"),
+
+        body("pw").notEmpty().withMessage("비밀번호값 없음").
+        if(body("pw").notEmpty()).
+        custom((pw) => validatePw(pw)).withMessage("유효하지 않은 비밀번호")
     ],
     validatorErrorChecker,
     controller.logIn
@@ -69,11 +76,25 @@ router.put(
     "/info",
     isSession,
     [
-        body("pw").notEmpty().isLength({ min: 8, max: 20 }),
-        body("name").notEmpty().isLength({ min: 2, max: 4 }),
-        body("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
+        body("pw").notEmpty().withMessage("비밀번호값 없음").
+        if(body("pw").notEmpty()).
+        custom((pw) => validatePw(pw)).withMessage("유효하지 않은 비밀번호"),
+
+        body("name").notEmpty().withMessage("이름값 없음").
+        if(body("name").notEmpty()).
+        custom((name) => validateName(name)).withMessage("유효하지 않은 이름"),
+
+        body("phonenumber").notEmpty().withMessage("전화번호값 없음").
+        if(body("phonenumber").notEmpty()).
+        custom((phonenumber) => validatePhonenumber(phonenumber)).withMessage("유효하지 않은 전화번호"),
+
+        body("email").notEmpty().withMessage("이메일값 없음").
+        if(body("email").notEmpty()).
+        isEmail().withMessage("유효하지 않은 이메일")
     ],
     validatorErrorChecker,
+    isDuplicate.email,
+    isDuplicate.phonenumber,
     controller.editInfo
 )
 

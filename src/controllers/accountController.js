@@ -1,5 +1,6 @@
 const pool = require('../databases/postgreSql')
 const { phonenumberCheck } = require('../middlewares/regulationCheck')
+const isDuplicate = require("../middlewares/isDuplicate")
 
 //회원가입
 const register = async (req, res, next) => {
@@ -36,10 +37,11 @@ const logIn = async (req, res, next) => {
             id: data.rows[0].id,
             pw: data.rows[0].pw,
             name: data.rows[0].name,
+            phonenumber: data.rows[0].phonenumber,
             email: data.rows[0].email,
             is_admin: data.rows[0].is_admin
         }
-        console.log(req.session.user.idx)
+        console.log(req.session.user.phonenumber)
         res.status(200).send()
     }
     catch (err) {
@@ -63,8 +65,8 @@ const logOut = async (req, res, next) => {
 const info = (req, res, next) => {
     const result = { "data": null }
     try {
-        const { id, pw, name, email } = req.session.user
-        result.data = {id, pw, name, email}
+        const { id, pw, name, phonenumber, email } = req.session.user
+        result.data = { id, pw, name, phonenumber, email }
         res.status(200).send(result)
     }
     catch (err) {
@@ -74,20 +76,19 @@ const info = (req, res, next) => {
 
 //내정보 수정
 const editInfo = async (req, res, next) => {
-    const {pw, name, email} = req.body
-
-    const emailChangeCheck = async (req, res, next) => {
-        const newEmail = req.body.email
-        try {
-            const currentEmail = req.session.user.email
-            if (newEmail !== currentEmail) {
-                duplicate.emailCheck
-            }
-            next()
+    const {pw, name, phonenumber, email} = req.body
+    try {
+        const currentEmail = req.session.user.email
+        const currentPhonenumber = req
+        if (email !== currentEmail) {
+            isDuplicate.email
         }
-        catch (err) {
-            return next(err)
+        if (phonenumber !== currentPhonenumber) {
+            isDuplicate.phonenumber
         }
+    }
+    catch (err) {
+        return next(err)
     }
     try {
         const idx = req.session.user.idx

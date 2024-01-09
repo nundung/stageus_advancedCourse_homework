@@ -3,12 +3,9 @@
 //아이디는 영문, 숫자의 조합
 const validateId = (id) => {
     console.log(id)
-    console.log("아디쳌")
     const idReg = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,18}$/
-    const value = idReg.test(id)
-    console.log(value)
+    return idReg.test(id)
 }
-
 
 //비밀번호는 영문, 숫자, 특수문자의 조합
 const validatePw = (pw) => {
