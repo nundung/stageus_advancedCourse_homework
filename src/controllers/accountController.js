@@ -5,7 +5,7 @@ const { phonenumberCheck } = require('../middlewares/regulationCheck')
 const register = async (req, res, next) => {
     const { id, pw, name, email, phonenumber } = req.body
     try {
-        const sql = "INSERT INTO account (id, pw, name, email,phonenumber) VALUES ($1, $2, $3, $4, $5)" //물음표 여러개면 $1, $2, $3
+        const sql = "INSERT INTO account (id, pw, name, email, phonenumber) VALUES ($1, $2, $3, $4, $5)" //물음표 여러개면 $1, $2, $3
         const values = [id, pw, name, email, phonenumber ]
         await pool.query(sql, values)
 

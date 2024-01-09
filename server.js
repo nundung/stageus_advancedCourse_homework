@@ -1,7 +1,6 @@
 //Import
 const express = require("express")
 const session = require("express-session")
-// const debug = require('debug')
 const FileStore = require("session-file-store")(session)
 require('dotenv').config()
 
@@ -19,7 +18,6 @@ app.use(session({
 }))
 
 //Apis
-
 const { log } = require("./src/middlewares/log")
 app.use(log)
 
@@ -35,11 +33,8 @@ app.use("/comment", commentApi)
 const managerApi = require("./src/routers/manager")
 app.use("/manager", managerApi)
 
-
-//후처리
 const { errorHandling } = require("./src/middlewares/errorHandling")
 app.use(errorHandling)
-
 
 
 //web Server

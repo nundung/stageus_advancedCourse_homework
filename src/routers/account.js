@@ -1,9 +1,10 @@
 //Import
 const router = require("express").Router()
-const { check } = require("express-validator")
+const { body } = require("express-validator")
 const { isSession, isNotSession } = require("../middlewares/isSession")
 const { validatorErrorChecker }  = require("../middlewares/validationHandler")
-const { idCheck, emailCheck, phonenumberCheck } = require('../middlewares/isDuplicate')
+const isDuplicate = require("../middlewares/isDuplicate")
+const { validateId, validatePw, validateName, validatePhonenumber } = require("../middlewares/regulationCheck")
 const controller = require("../controllers/accountController")
 
 //Apis
@@ -12,16 +13,28 @@ router.post(
     "/",
     isNotSession,
     [
-        check("id").notEmpty().isLength({ min: 6, max: 18 }),
-        check("pw").notEmpty().isLength({ min: 8, max: 20 }),
-        check("name").notEmpty().isLength({ min: 2, max: 4 }),
-        check("phonenumber").notEmpty().isLength({ min: 11, max: 13 }),
-        check("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
+        body("id").notEmpty().withMessage("아이디값 없음").
+        if(body("pw").notEmpty()).
+        custom((id) => validateId(id)).withMessage("유효하지 않은 아이디"),
+
+        body("pw").notEmpty().withMessage("비밀번호값 없음").
+        if(body("pw").notEmpty()).
+        custom((pw) => validatePw(pw)).withMessage("유효하지 않은 비밀번호"),
+
+        body("name").notEmpty().withMessage("이름값 없음").
+        if(body("name").notEmpty()).
+        custom((name) => validateName(name)).withMessage("유효하지 않은 이름"),
+
+        body("phonenumber").notEmpty().withMessage("전화번호값 없음").
+        if(body("phonenumber").notEmpty()).
+        custom((phonenumber) => validatePhonenumber(phonenumber)).withMessage("유효하지 않은 전화번호"),
+
+        body("email").if(body("email").notEmpty()).isEmail().withMessage("유효하지 않은 이메일")
     ],
     validatorErrorChecker,
-    idCheck,
-    phonenumberCheck,
-    emailCheck,
+    isDuplicate.id,
+    isDuplicate.email,
+    isDuplicate.phonenumber,
     controller.register
 ) 
 
@@ -30,8 +43,8 @@ router.post(
     "/login",
     isNotSession,
     [
-        check("id").notEmpty().isLength({ min: 6, max: 18 }),
-        check("pw").notEmpty().isLength({ min: 8, max: 20 }),
+        body("id").notEmpty().isLength({ min: 6, max: 18 }),
+        body("pw").notEmpty().isLength({ min: 8, max: 20 }),
     ],
     validatorErrorChecker,
     controller.logIn
@@ -56,9 +69,9 @@ router.put(
     "/info",
     isSession,
     [
-        check("pw").notEmpty().isLength({ min: 8, max: 20 }),
-        check("name").notEmpty().isLength({ min: 2, max: 4 }),
-        check("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
+        body("pw").notEmpty().isLength({ min: 8, max: 20 }),
+        body("name").notEmpty().isLength({ min: 2, max: 4 }),
+        body("email").notEmpty().isEmail().withMessage('올바른 이메일 주소를 입력해주세요.')
     ],
     validatorErrorChecker,
     controller.editInfo
