@@ -79,6 +79,7 @@ const editInfo = async (req, res, next) => {
     const {pw, name, phonenumber, email} = req.body
     try {
         const currentEmail = req.session.user.email
+        console.log(email, currentEmail)
         const currentPhonenumber = req
         if (email !== currentEmail) {
             isDuplicate.email
@@ -93,14 +94,15 @@ const editInfo = async (req, res, next) => {
     try {
         const idx = req.session.user.idx
 
-        const sql = "UPDATE account SET pw=$1, name=$2, email=$3 WHERE idx=$4"   //물음표 여러개면 $1, $2, $3
-        const values = [pw, name, email, idx]
+        const sql = "UPDATE account SET pw=$1, name=$2, phonenumber=$3, email=$4 WHERE idx=$5"   //물음표 여러개면 $1, $2, $3
+        const values = [pw, name, phonenumber, email, idx]
         data = await pool.query(sql, values)
 
         req.session.user = {
             ...req.session.user,
             pw: pw,
             name: name,
+            phonenumber: phonenumber,
             email: email
         }
         res.status(200).send()

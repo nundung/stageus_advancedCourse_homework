@@ -93,8 +93,6 @@ router.put(
         isEmail().withMessage("유효하지 않은 이메일")
     ],
     validatorErrorChecker,
-    isDuplicate.email,
-    isDuplicate.phonenumber,
     controller.editInfo
 )
 
