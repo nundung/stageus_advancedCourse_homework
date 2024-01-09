@@ -1,7 +1,7 @@
 //Import
 const { logModel } = require("../databases/mongoDb")
 
-const log = async (err, req, res, next) => {
+const log = async (req, res, next) => {
     // 여기서 logModel을 사용하여 로그를 MongoDB에 저장하는 작업을 수행
     const logData = {
         ip: req.ip,
@@ -10,14 +10,16 @@ const log = async (err, req, res, next) => {
         method: req.method,
         requestedTimestamp: new Date(),
         respondedTimestamp: null, 
-        status: res.statusCode, 
+        status: null, 
         stackTrace: null
     }
     res.on('finish', async () => {
         console.log("순서2")
         logData.respondedTimestamp = new Date() // 응답 시간을 현재 시간으로 설정
-        logData.status = req.errorData ? req.errorData.statusCode : res.statusCode;
-        logData.stackTrace = req.errorData ? req.errorData.stackTrace : null;
+        logData.status = res.locals.error ? res.locals.error.statusCode : res.statusCode;
+        logData.stackTrace = res.locals.error ? res.locals.error.stackTrace : null;
+        logData.message = res.locals.error ? res.locals.error.message : null;
+        
         try {
             const log = await logModel.create(logData)
             console.log('로그가 성공적으로 저장되었습니다:', log)

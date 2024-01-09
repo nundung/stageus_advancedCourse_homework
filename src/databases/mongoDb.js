@@ -21,7 +21,7 @@ const logSchema = new Schema({
     requestedTimestamp: { type: Date, required: true },
     respondedTimestamp: { type: Date, required: true },
     status: { type: Number, required: true },
-    stacktrace: { type: String }
+    stackTrace: { type: String }
 })
 
 // 로그 모델 생성

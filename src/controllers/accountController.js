@@ -18,7 +18,6 @@ const register = async (req, res, next) => {
 
 //로그인
 const logIn = async (req, res, next) => {
-    console.log("실행")
     const { id, pw } = req.body
     try {
         const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2"   //물음표 여러개면 $1, $2, $3
