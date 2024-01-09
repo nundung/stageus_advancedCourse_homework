@@ -35,8 +35,12 @@ app.use("/comment", commentApi)
 const managerApi = require("./src/routers/manager")
 app.use("/manager", managerApi)
 
+
+//후처리
 const { errorHandling } = require("./src/middlewares/errorHandling")
 app.use(errorHandling)
+
+
 
 //web Server
 app.listen(port, () => {
