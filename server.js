@@ -30,8 +30,8 @@ app.use("/post", postApi, )
 const commentApi = require("./src/routers/comment")
 app.use("/comment", commentApi)
 
-const managerApi = require("./src/routers/manager")
-app.use("/manager", managerApi)
+const adminApi = require("./src/routers/admin")
+app.use("/admin", adminApi)
 
 const { errorHandling } = require("./src/middlewares/errorHandling")
 app.use(errorHandling)
