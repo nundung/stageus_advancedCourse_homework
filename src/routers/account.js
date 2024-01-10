@@ -4,7 +4,7 @@ const { body } = require("express-validator")
 const { isSession, isNotSession } = require("../middlewares/isSession")
 const { validatorErrorChecker }  = require("../middlewares/validationHandler")
 const isDuplicate = require("../middlewares/isDuplicate")
-const { validateId, validatePw, validateName, validatePhonenumber } = require("../middlewares/regulationCheck")
+const { validateId, validatePw, validateName, validatePhonenumber } = require("../middlewares/checkRegulation")
 const controller = require("../controllers/accountController")
 
 //Apis
@@ -93,6 +93,8 @@ router.put(
         isEmail().withMessage("유효하지 않은 이메일")
     ],
     validatorErrorChecker,
+    isDuplicate.email,
+    isDuplicate.phonenumber,
     controller.editInfo
 )
 

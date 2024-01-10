@@ -23,18 +23,34 @@ const id = async (req, res, next) => {
 
 //이메일 중복체크
 const email = async (req, res, next) => {
-    try {
-        const email = req.body.email
-        const sql = "SELECT * FROM account WHERE email=$1" //물음표 여러개면 $1, $2, $3
-        const values = [email]
-        const data = await client.query(sql, values)
+    const { email } = req.body
 
-        if (data.rows.length > 0) {
-            const e = new Error("이미 사용 중인 이메일입니다.")
-            e.status = 409         //이미 존재하는 리소스에 대한 중복된 생성 요청
-            return next(e)
+    const duplicateCheck = async () => {
+        try {
+            const sql = "SELECT * FROM account WHERE email=$1"
+            const values = [email]
+            const data = await client.query(sql, values)
+
+            if (data.rows.length > 0) {
+                const e = new Error("이미 사용 중인 이메일입니다.")
+                e.status = 409
+                return next(e)
+            }
+            next()
+        } 
+        catch (err) {
+            next(err)
         }
-        next()
+    }
+    try {
+        if (req.session.user) {
+            const currentEmail = req.session.user.email
+            if (email === currentEmail) {
+                return next()
+            } 
+            await duplicateCheck()
+        }
+        else { await duplicateCheck() }
     }
     catch (err) {
         next(err)
@@ -44,18 +60,34 @@ const email = async (req, res, next) => {
 
 //전화번호 중복체크
 const phonenumber = async (req, res, next) => {
-    try {
-        const phonenumber = req.body.phonenumber
-        const sql = "SELECT * FROM account WHERE phonenumber=$1" //물음표 여러개면 $1, $2, $3
-        const values = [phonenumber]
-        const data = await client.query(sql, values)
+    const { phonenumber } = req.body
+    
+    const duplicateCheck = async () => {
+        try {
+            const sql = "SELECT * FROM account WHERE phonenumber=$1" //물음표 여러개면 $1, $2, $3
+            const values = [phonenumber]
+            const data = await client.query(sql, values)
 
-        if (data.rows.length > 0) {
-            const e = new Error("이미 사용 중인 연락처입니다.")
-            e.status = 409         //이미 존재하는 리소스에 대한 중복된 생성 요청
-            throw e
+            if (data.rows.length > 0) {
+                const e = new Error("이미 사용 중인 연락처입니다.")
+                e.status = 409         //이미 존재하는 리소스에 대한 중복된 생성 요청
+                throw e
+            }
+            next()
         }
-        next()
+        catch (err) {
+            next(err)
+        }
+    }
+    try {
+        if(req.session.user) {
+            const currentPhonenumber = req.session.user.phonenumber
+            if (phonenumber === currentPhonenumber) {
+                return next()
+            } 
+            await duplicateCheck()
+        }
+        else { await duplicateCheck() }
     }
     catch (err) {
         next(err)

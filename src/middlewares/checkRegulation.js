@@ -1,5 +1,3 @@
-
-
 //아이디는 영문, 숫자의 조합
 const validateId = (id) => {
     console.log(id)

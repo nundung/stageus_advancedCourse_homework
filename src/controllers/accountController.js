@@ -1,5 +1,4 @@
-const pool = require('../databases/postgreSql')
-const { phonenumberCheck } = require('../middlewares/regulationCheck')
+const pool = require("../databases/postgreSql")
 const isDuplicate = require("../middlewares/isDuplicate")
 
 //회원가입
@@ -66,7 +65,7 @@ const info = (req, res, next) => {
     const result = { "data": null }
     try {
         const { id, pw, name, phonenumber, email } = req.session.user
-        result.data = { id, pw, name, phonenumber, email }
+        result.data = [ id, pw, name, phonenumber, email ]
         res.status(200).send(result)
     }
     catch (err) {
@@ -78,22 +77,7 @@ const info = (req, res, next) => {
 const editInfo = async (req, res, next) => {
     const {pw, name, phonenumber, email} = req.body
     try {
-        const currentEmail = req.session.user.email
-        console.log(email, currentEmail)
-        const currentPhonenumber = req
-        if (email !== currentEmail) {
-            isDuplicate.email
-        }
-        if (phonenumber !== currentPhonenumber) {
-            isDuplicate.phonenumber
-        }
-    }
-    catch (err) {
-        return next(err)
-    }
-    try {
         const idx = req.session.user.idx
-
         const sql = "UPDATE account SET pw=$1, name=$2, phonenumber=$3, email=$4 WHERE idx=$5"   //물음표 여러개면 $1, $2, $3
         const values = [pw, name, phonenumber, email, idx]
         data = await pool.query(sql, values)
