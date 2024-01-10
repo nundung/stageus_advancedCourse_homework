@@ -69,7 +69,7 @@ router.get(
     "/info",
     isSession,
     controller.info
-    )
+)
 
 //내정보 수정
 router.put(
