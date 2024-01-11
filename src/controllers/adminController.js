@@ -41,4 +41,4 @@ const log = async (req, res, next) => {
 
 
 
-module.exports = { log, logId }
+module.exports = { log }
