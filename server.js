@@ -1,5 +1,6 @@
 //Import
 const express = require("express")
+const jwt = require("jsonwebtoken")
 const session = require("express-session")
 const FileStore = require("session-file-store")(session)
 require('dotenv').config()
@@ -18,6 +19,9 @@ app.use(session({
 }))
 
 //Apis
+// const { isToken } = require("./src/middlewares/isToken")
+// app.use(isToken)
+
 const { log } = require("./src/middlewares/log")
 app.use(log)
 

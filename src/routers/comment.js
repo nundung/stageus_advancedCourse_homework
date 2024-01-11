@@ -1,16 +1,16 @@
 //Import
 const router = require("express").Router()
 const controller = require("../controllers/commentController")
-const { isSession } = require("../middlewares/isSession")
 const { validatorErrorChecker }  = require("../middlewares/validationHandler")
 const { check } = require("express-validator")
+const { isToken } = require("../middlewares/isToken")
 
 
 //Apis
 //댓글 업로드
 router.post(
     "/",
-    isSession,
+    isToken,
     check("comment").notEmpty().isLength({min: 1, max: 200}),
     validatorErrorChecker,
     controller.uploadComment
@@ -19,14 +19,14 @@ router.post(
 //댓글 보기
 router.get(
     "/",
-    isSession,
+    isToken,
     controller.readComment
 )
 
 //댓글 수정
 router.put(
     "/:commentidx",
-    isSession,
+    isToken,
     check("comment").notEmpty().isLength({min: 1, max: 200}),
     validatorErrorChecker,
     controller.editComment
@@ -35,7 +35,7 @@ router.put(
 //댓글 삭제
 router.delete(
     "/:commentidx",
-    isSession,
+    isToken,
     controller.deleteComment
 )
 

@@ -73,7 +73,7 @@ router.get("/token", isToken, async (req, res) => {
 //로그인
 router.post(
     "/login",
-    // isNotSession,
+    isNotSession,
     [
         body("id").notEmpty().withMessage("아이디값 없음").
         if(body("id").notEmpty()).
@@ -104,7 +104,7 @@ router.get(
 //내정보 수정
 router.put(
     "/info",
-    isSession,
+    isToken,
     [
         body("pw").notEmpty().withMessage("비밀번호값 없음").
         if(body("pw").notEmpty()).
@@ -131,7 +131,7 @@ router.put(
 //계정 삭제
 router.delete(
     "/",
-    isSession,
+    isToken,
     controller.deleteAccount
 )
 

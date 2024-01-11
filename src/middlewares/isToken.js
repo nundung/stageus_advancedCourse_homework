@@ -28,4 +28,5 @@ const isToken = (req, res, next) => {
         res.send(result)
     }
 }
+
 module.exports = { isToken }

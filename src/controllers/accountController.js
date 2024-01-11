@@ -18,7 +18,6 @@ const register = async (req, res, next) => {
 
 //로그인
 const logIn = async (req, res, next) => {
-
     const { id, pw } = req.body
     const result = { 
         "success": false,
@@ -26,14 +25,8 @@ const logIn = async (req, res, next) => {
             "token": "" 
         }
     }
-    try {
-        const token = jwt.sign({
-            "id": id,
-            "pw": pw
-        }, process.env.SECRET_KEY, {
-            "expiresIn": "5m"
-        })
 
+    try {
         const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2"   //물음표 여러개면 $1, $2, $3
         const values = [id, pw]
         const data = await pool.query(sql, values)
@@ -44,26 +37,18 @@ const logIn = async (req, res, next) => {
             return next(err)
         }
 
+        const token = jwt.sign({ "id": id },
+        process.env.SECRET_KEY,
+        { "expiresIn": "1h" }
+    )
+
         result.success = true
         result.data.token = token
-        res.send(result)
+        res.status(200).send(result)
 
-        // 로그인 성공
-        // req.session.user = {
-        //     idx: data.rows[0].idx,
-        //     id: data.rows[0].id,
-        //     pw: data.rows[0].pw,
-        //     name: data.rows[0].name,
-        //     phonenumber: data.rows[0].phonenumber,
-        //     email: data.rows[0].email,
-        //     is_admin: data.rows[0].is_admin
-        // }
-        // console.log(req.session.user.phonenumber)
-        // res.status(200).send()
     }
     catch (err) {
         next(err)
-        result.message = err.message
     }
 }
 
@@ -80,11 +65,32 @@ const logOut = async (req, res, next) => {
 }
 
 //내정보 보기
-const info = (req, res, next) => {
-    const result = { "data": null }
+const info = async (req, res, next) => {
+    const result = { 
+        "data": {
+            "token": "" 
+        }
+    }
+
     try {
-        const { id, pw, name, phonenumber, email } = req.session.user
-        result.data = [ id, pw, name, phonenumber, email ]
+        const authInfo = req.decoded
+        console.log(authInfo)
+        if (!authInfo || !authInfo.id) {
+            const err = new Error("아이디 또는 비밀번호가 올바르지 않습니다.")
+            err.status = 401         //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다. (인증X)
+            return next(err)
+        }
+        const id = authInfo.id
+
+        if (id === null || id === "" || id === undefined) throw new Error("아이디 비어있음")
+
+        const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2"   //물음표 여러개면 $1, $2, $3
+        const values = [id]
+        const data = await pool.query(sql, values)
+
+        const row = data.rows      //데이터베이스에서 가져온 값들 중 테이블 값만 저장
+        result.success = true
+        result.data = row
         res.status(200).send(result)
     }
     catch (err) {
