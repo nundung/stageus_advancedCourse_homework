@@ -13,9 +13,8 @@ const validatorErrorChecker = (req, res, next) => {
         //     statusCode: statusCode,
         //     stackTrace: stackTrace
     //     // }
-    res.locals.error = errors
-}
-    
+    //res.locals.error = errors
+    }
 
     next()
 }
