@@ -1,5 +1,5 @@
 const pool = require("../databases/postgreSql")
-const isDuplicate = require("../middlewares/isDuplicate")
+const jwt = require("jsonwebtoken")
 
 //회원가입
 const register = async (req, res, next) => {
@@ -18,8 +18,22 @@ const register = async (req, res, next) => {
 
 //로그인
 const logIn = async (req, res, next) => {
+
     const { id, pw } = req.body
+    const result = { 
+        "success": false,
+        "data": {
+            "token": "" 
+        }
+    }
     try {
+        const token = jwt.sign({
+            "id": id,
+            "pw": pw
+        }, process.env.SECRET_KEY, {
+            "expiresIn": "5m"
+        })
+
         const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2"   //물음표 여러개면 $1, $2, $3
         const values = [id, pw]
         const data = await pool.query(sql, values)
@@ -30,21 +44,26 @@ const logIn = async (req, res, next) => {
             return next(err)
         }
 
+        result.success = true
+        result.data.token = token
+        res.send(result)
+
         // 로그인 성공
-        req.session.user = {
-            idx: data.rows[0].idx,
-            id: data.rows[0].id,
-            pw: data.rows[0].pw,
-            name: data.rows[0].name,
-            phonenumber: data.rows[0].phonenumber,
-            email: data.rows[0].email,
-            is_admin: data.rows[0].is_admin
-        }
-        console.log(req.session.user.phonenumber)
-        res.status(200).send()
+        // req.session.user = {
+        //     idx: data.rows[0].idx,
+        //     id: data.rows[0].id,
+        //     pw: data.rows[0].pw,
+        //     name: data.rows[0].name,
+        //     phonenumber: data.rows[0].phonenumber,
+        //     email: data.rows[0].email,
+        //     is_admin: data.rows[0].is_admin
+        // }
+        // console.log(req.session.user.phonenumber)
+        // res.status(200).send()
     }
     catch (err) {
         next(err)
+        result.message = err.message
     }
 }
 
