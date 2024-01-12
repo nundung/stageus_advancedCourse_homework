@@ -5,7 +5,8 @@ const uploadComment = async (req, res, next) => {
     const postIdx = req.query.postidx
     const { comment } = req.body
     try {
-        const idx = req.session.user.idx
+        const authInfo = req.decoded
+        const idx = authInfo.idx
 
         const sql = "INSERT INTO comment (post_idx, account_idx, content) VALUES ($1, $2, $3)"
         const values = [postIdx, idx, comment]
@@ -49,7 +50,8 @@ const editComment = async (req, res, next) => {
     const contentIdx = req.params.commentidx
     const {comment} = req.body
     try {
-        const idx = req.session.user.idx
+        const authInfo = req.decoded
+        const idx = authInfo.idx
 
         const sql = "UPDATE comment SET content=$1 WHERE idx=$2 AND account_idx=$3"
         const values = [comment, contentIdx, idx]
@@ -65,7 +67,8 @@ const editComment = async (req, res, next) => {
 const deleteComment = async (req, res, next) => {
     const contentIdx = req.params.commentidx
     try {
-        const idx = req.session.user.idx
+        const authInfo = req.decoded
+        const idx = authInfo.idx
         
         const sql = "DELETE FROM comment WHERE idx=$1 AND account_idx=$2"
         const values = [contentIdx, idx]

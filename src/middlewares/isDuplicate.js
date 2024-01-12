@@ -1,5 +1,5 @@
 // import
-const client = require('../databases/postgreSql')
+const pool = require('../databases/postgreSql')
 
 //아이디 중복체크
 const id = async (req, res, next) => {
@@ -7,7 +7,7 @@ const id = async (req, res, next) => {
     try {
         const sql = "SELECT * FROM account WHERE id=$1" //물음표 여러개면 $1, $2, $3
         const values = [id]
-        const data = await client.query(sql, values)
+        const data = await pool.query(sql, values)
 
         if (data.rows.length > 0) {
             const e = new Error("이미 사용 중인 아이디입니다.")
@@ -29,7 +29,7 @@ const email = async (req, res, next) => {
         try {
             const sql = "SELECT * FROM account WHERE email=$1"
             const values = [email]
-            const data = await client.query(sql, values)
+            const data = await pool.query(sql, values)
 
             if (data.rows.length > 0) {
                 const e = new Error("이미 사용 중인 이메일입니다.")
@@ -66,7 +66,7 @@ const phonenumber = async (req, res, next) => {
         try {
             const sql = "SELECT * FROM account WHERE phonenumber=$1" //물음표 여러개면 $1, $2, $3
             const values = [phonenumber]
-            const data = await client.query(sql, values)
+            const data = await pool.query(sql, values)
 
             if (data.rows.length > 0) {
                 const e = new Error("이미 사용 중인 연락처입니다.")
@@ -80,8 +80,15 @@ const phonenumber = async (req, res, next) => {
         }
     }
     try {
+        const authInfo = req.decoded
+        const idx = authInfo.idx
+        
+        const sql = "SELECT phonenumber FROM account WHERE idx=$1"   //물음표 여러개면 $1, $2, $3
+        const values = [idx]
+        const data = await pool.query(sql, values)
+
+        const currentPhonenumber = data.rows[0].phonenumber
         if(req.session.user) {
-            const currentPhonenumber = req.session.user.phonenumber
             if (phonenumber === currentPhonenumber) {
                 return next()
             } 

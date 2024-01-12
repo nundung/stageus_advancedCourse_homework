@@ -1,15 +1,16 @@
 const jwt = require("jsonwebtoken")
 
 const isToken = (req, res, next) => {
-    const { token } = req.headers
+    const { authorization } = req.headers
     const result = {
-        "success": false,
         "message": "",
     }
     try {
-        if (!token || token === "") {
+        if (!authorization || authorization === "") {
             throw new Error("no token")
         }
+        
+        const token = authorization.split(" ")[1];
         req.decoded = jwt.verify(token, process.env.SECRET_KEY)
         //이 명령어의 반환값이 바로 token에 있는 payload로 변환한 것
         next()
