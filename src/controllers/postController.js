@@ -13,7 +13,7 @@ const postList = async (req, res, next) => {
         // post 테이블과 account 테이블을 account_idx와 idx 열을 기준으로 조인. post 테이블의 account_idx와 account 테이블의 idx 값이 일치하는 행을 연결
         
         const data = await pool.query(sql)
-
+        console.log(data)
         if (data.rowCount > 0) {
             result.data = data.rows
             res.status(200).send(result)
@@ -31,7 +31,8 @@ const postList = async (req, res, next) => {
 const uploadPost = async (req, res, next) => {
     const { title, content } = req.body
     try {
-        const idx = req.session.user.idx
+        const authInfo = req.decoded
+        const idx = authInfo.idx
 
         const sql = "INSERT INTO post(account_idx, title, content) VALUES ($1, $2, $3)"
         const values = [idx, title, content]
@@ -75,7 +76,8 @@ const editPost = async (req, res, next) => {
     const postIdx = req.params.postidx
     const { title, content } = req.body
     try {
-        const idx = req.session.user.idx
+        const authInfo = req.decoded
+        const idx = authInfo.idx
 
         const sql = "UPDATE post SET title=$1, content=$2 WHERE idx=$3 AND account_idx=$4"
         const values = [title, content, postIdx, idx]
@@ -92,7 +94,8 @@ const editPost = async (req, res, next) => {
 const deletePost = async (req, res, next) => {
     const postIdx = req.params.postidx
     try {
-        const idx = req.session.user.idx
+        const authInfo = req.decoded
+        const idx = authInfo.idx
 
         const sql = "DELETE FROM post WHERE idx=$1 AND account_idx=$2"
         const values = [postIdx, idx]
