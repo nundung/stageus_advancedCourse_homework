@@ -1,4 +1,4 @@
-const pool = require("../databases/postgreSql")
+const { pool } = require("../databases/postgreSql")
 
 //댓글 업로드
 const uploadComment = async (req, res, next) => {
@@ -47,6 +47,7 @@ const readComment = async (req, res, next) => {
 
 //댓글 수정
 const editComment = async (req, res, next) => {
+    // 파라미터 : 특정 데이터를 조회하거나 수정할 때 사용
     const contentIdx = req.params.commentidx
     const {comment} = req.body
     try {

@@ -1,25 +1,28 @@
 //Import
 const router = require("express").Router()
-const { isAdmin } = require("../middlewares/isSession")
 const controller = require("../controllers/adminController")
+const { isToken, isAdmin } = require("../middlewares/isToken")
 
 
 //로그목록 보기
-router.get("/log/:sort?/:startdate?/:enddate?/:id?/:api?",
+router.get("/log",
+    isToken,
     isAdmin,
     controller.log
 )
 
 //유저목록 보기
-router.get("/account/:sort?/:startdate?/:enddate?",
+router.get("/account",
+    isToken,
     isAdmin,
     controller.account
 )
 
 //댓글목록 보기
-router.get("/commentlist/:sort/:startdate/:enddate/:id?",
-isAdmin,
-controller.log
+router.get("/comment",
+    isToken,
+    isAdmin,
+    controller.comment
 )
 
 

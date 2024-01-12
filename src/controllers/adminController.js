@@ -1,34 +1,38 @@
 //Import
 const { logModel } = require("../databases/mongoDb")
-const { pool } = require("../databases/postgreSql")
+const pool = require("../databases/postgreSql")
 
 
 const log = async (req, res, next) => {
-    const sort = req.params.sort
-    const startDate = req.params.startdate
-    const endDate = req.params.enddate
-    const id = req.params.id
-    const api = req.params.api
+    const { sort, startdate, enddate, id, api } = req.query
     const result = { "data": null }
     try {
-        const date = {
-            requestedTimestamp: {
-                $gte: startDate,
-                $lte: endDate
+        const filter = {}
+
+        if(startdate) {
+            filter.requestedTimestamp = {
+                $gte: startdate
             }
         }
+        if (enddate) {
+            filter.requestedTimestamp = {
+                ...filter.requestedTimestamp,
+                $lte: enddate,
+            };
+        }
+
         if (id) {
-            date.id = id
+            filter.id = id
         }
         if (api) {
-            date.url = { $regex: new RegExp(`^/${api}`) }
+            filter.url = { $regex: new RegExp(`^/${api}`) }
         }
         let db
         if (sort == "asc") {
-            db = await logModel.find(date).sort({ requestedTimestamp: 1 })
+            db = await logModel.find(filter).sort({ requestedTimestamp: 1 })
         }
         else {
-            db = await logModel.find(date).sort({ requestedTimestamp: -1 })
+            db = await logModel.find(filter).sort({ requestedTimestamp: -1 })
         }
 
         result.data = db
@@ -42,27 +46,36 @@ const log = async (req, res, next) => {
 
 
 const account = async (req, res, next) => {
-    const sort = req.params.sort
-    const startDate = req.params.startdate
-    const endDate = req.params.enddate
+    const { sort, startdate, enddate } = req.query
     const result = { "data": null }
     try {
-        // const date = {
-        //     requestedTimestamp: {
-        //         $gte: startDate,
-        //         $lte: endDate
-        //     }
-        // }
-        const sql = `SELECT * FROM account desc` 
-        const data = await pool.query(sql)
+        let sql = `SELECT * FROM account`
+        if (startdate) {
+            sql += " WHERE created_at >= $1"
+        }
+        if (enddate) {
+            // startdate가 이미 존재하는 경우 AND로 연결
+            sql += startdate ? " AND" : " WHERE"
+            sql += " created_at <= $2"
+        }
+        if (sort) {
+            sql += ` ORDER BY idx ${sort}`
+        }
+
+        console.log(sql)
+        
+        // 시작일과 종료일이 있는 경우에만 바인딩 매개변수 추가
+        const values = startdate || enddate ? [startdate, enddate] : []
+
+        const data = await pool.query(sql, values)
 
         if (data.rowCount > 0) {
             result.data = data.rows
             res.status(200).send(result)
         }
-        // else {
-        //     res.status(200).send("유저 목록이 비어있습니다.")
-        // }
+        else {
+        res.status(200).send("유저 목록이 비어있습니다.")
+        }
     }
     catch (err) {
         console.log(err)
@@ -71,23 +84,15 @@ const account = async (req, res, next) => {
 }
 
 const comment = async (req, res, next) => {
-    const sort = req.params.sort
-    const startDate = req.params.startdate
-    const endDate = req.params.enddate
+    const { sort, startdate, enddate, id, api, postidx } = req.query
     const result = { "data": null }
     try {
-        const date = {
-            requestedTimestamp: {
-                $gte: startDate,
-                $lte: endDate
-            }
-        }
-        let db
-        if (sort == "desc") {
-            db = await logModel.find(date).sort({ requestedTimestamp: -1 })
-        }
-        else if (sort == "asc") {
-            db = await logModel.find(date).sort({ requestedTimestamp: 1 })
+        const sql = `SELECT * FROM account ORDER BY idx ${sort}` 
+        const data = await pool.query(sql)
+
+        if (data.rowCount > 0) {
+            result.data = data.rows
+            res.status(200).send(result)
         }
 
         result.data = db

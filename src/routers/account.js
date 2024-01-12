@@ -1,18 +1,17 @@
 //Import
 const router = require("express").Router()
 const { body } = require("express-validator")
-const { isSession, isNotSession } = require("../middlewares/isSession")
 const { validatorErrorChecker }  = require("../middlewares/validationHandler")
 const isDuplicate = require("../middlewares/isDuplicate")
 const { validateId, validatePw, validateName, validatePhonenumber } = require("../middlewares/checkRegulation")
 const controller = require("../controllers/accountController")
-const { isToken } = require("../middlewares/isToken")
+const { isToken, haveToken } = require("../middlewares/isToken")
 
 //Apis
 //회원가입 & 아이디/이메일 중복체크
 router.post(
     "/",
-    isNotSession,
+    //isNotSession,
     [
         body("id").notEmpty().withMessage("아이디 없음").
         if(body("id").notEmpty()).
@@ -41,38 +40,10 @@ router.post(
     controller.register
 ) 
 
-// //토큰 확인
-// router.get("/token", isToken, async (req, res) => {
-//     const result = {
-//         "success": false,
-//         "data": null
-//     }
-    
-//     const authInfo = req.decoded
-//     console.log(authInfo)
-
-//     try {
-//         if (id === null || id === "" || id === undefined) throw new Error("아이디 비어있음")
-//         console.log("api 진입함")
-
-//         const sql = "SELECT * FROM account WHERE id=$1"   //물음표 여러개면 $1, $2, $3
-//         const values = [id]
-//         const data = await pool.query(sql, values)
-
-//         const row = data.rows      //데이터베이스에서 가져온 값들 중 테이블 값만 저장
-//         result.success = true
-//         result.data = row
-//         res.send(result)
-//     }
-//     catch (err) {
-//         next(err)
-//         result.message = err.message
-//     }
-// })
-
 //로그인
 router.post(
     "/login",
+    haveToken,
     // isNotSession,
     [
         body("id").notEmpty().withMessage("아이디값 없음").
@@ -90,7 +61,6 @@ router.post(
 //로그아웃
 router.get(
     "/logout",
-    // isSession,
     isToken,
     controller.logOut
 )

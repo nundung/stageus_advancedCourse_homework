@@ -11,7 +11,6 @@ const errorHandling = (err, req, res, next) => {
     }
     res.locals.error = error
     res.status(statusCode).json({ message: errorMessage })
-    console.log("순서1")
     next()
 }
 

@@ -1,5 +1,5 @@
 // import
-const pool = require('../databases/postgreSql')
+const { pool } = require('../databases/postgreSql')
 
 //아이디 중복체크
 const id = async (req, res, next) => {

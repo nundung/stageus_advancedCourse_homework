@@ -1,4 +1,4 @@
-const pool = require("../databases/postgreSql")
+const { pool } = require("../databases/postgreSql")
 const jwt = require("jsonwebtoken")
 
 //회원가입
@@ -32,17 +32,9 @@ const logIn = async (req, res, next) => {
         }
 
         const idx = data.rows[0].idx
-        const token = jwt.sign({ "idx": idx }, process.env.SECRET_KEY, { "expiresIn": "1h" })
-    // 로그인 성공
-    req.session.user = {
-        idx: data.rows[0].idx,
-        id: data.rows[0].id,
-        pw: data.rows[0].pw,
-        name: data.rows[0].name,
-        phonenumber: data.rows[0].phonenumber,
-        email: data.rows[0].email,
-        is_admin: data.rows[0].is_admin
-    }
+        const token = jwt.sign({ "idx": idx }, process.env.SECRET_KEY, { "expiresIn": "20m" })
+        
+        req.session.token = token
         result.data.token = token
         res.status(200).send(result)
     }

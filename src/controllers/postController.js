@@ -1,4 +1,4 @@
-const pool = require('../databases/postgreSql')
+const { pool } = require('../databases/postgreSql')
 
 //게시물 목록(게시판)
 const postList = async (req, res, next) => {

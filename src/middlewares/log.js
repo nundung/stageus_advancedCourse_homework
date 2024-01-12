@@ -14,7 +14,6 @@ const log = async (req, res, next) => {
         stackTrace: null
     }
     res.on('finish', async () => {
-        console.log("순서2")
         logData.respondedTimestamp = new Date() // 응답 시간을 현재 시간으로 설정
         logData.status = res.locals.error ? res.locals.error.statusCode : res.statusCode;
         logData.stackTrace = res.locals.error ? res.locals.error.stackTrace : null;

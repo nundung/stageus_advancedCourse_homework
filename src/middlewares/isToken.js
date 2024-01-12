@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken")
+const { pool } = require("../databases/postgreSql")
 
 const isToken = (req, res, next) => {
     const { authorization } = req.headers
@@ -30,4 +31,28 @@ const isToken = (req, res, next) => {
     }
 }
 
-module.exports = { isToken }
+const isAdmin = async (req, res, next) => {
+    const authInfo = req.decoded
+    const idx = authInfo.idx
+    
+    const sql = "SELECT is_admin FROM account WHERE idx=$1"   //물음표 여러개면 $1, $2, $3
+    const values = [idx]
+    const data = await pool.query(sql, values)
+
+    const isAdmin = data.rows[0].is_admin
+    if (isAdmin === false) {
+        const err = new Error("접근 권한이 없습니다.")
+        err.status = 401         //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다. (인증X)
+        next(err)
+    }
+    next()
+}
+
+const haveToken =  async (req, res, next) => {
+    if(req.session) {
+        const token = req.session.token
+        const err = new Error("이미 로그인 되어있습니다.")
+        return next (err)
+    }
+}
+module.exports = { isToken , isAdmin, haveToken}
