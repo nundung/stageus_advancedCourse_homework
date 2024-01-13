@@ -48,10 +48,9 @@ const isAdmin = async (req, res, next) => {
     next()
 }
 const haveToken =  async (req, res, next) => {
-    if(req.session) {
-        console.log(req.session)
+    console.log(req.session)
+    if(req.session.token) {
         const token = req.session.token
-        console.log(token)
         const err = new Error("이미 로그인 되어있습니다.")
         return next (err)
     }

@@ -59,8 +59,9 @@ const logIn = async (req, res, next) => {
 const logOut = async (req, res, next) => {
     try {
         req.session.destroy() 
-        console.log(req.session)
+        res.clearCookie('token')  // 토큰 쿠키 삭제
         res.clearCookie('connect.sid')  // 세션 쿠키 삭제
+        console.log(req.session)
         res.status(200).send()
     }
     catch (err) {
