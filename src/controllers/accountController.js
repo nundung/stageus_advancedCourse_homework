@@ -32,10 +32,22 @@ const logIn = async (req, res, next) => {
         }
 
         const idx = data.rows[0].idx
-        const token = jwt.sign({ "idx": idx }, process.env.SECRET_KEY, { "expiresIn": "20m" })
+
+        const currentDevice = {
+            sessionId: req.sessionID,
+            userAgent: req.headers['user-agent'],
+            clientIP: req.ip,
+            isLoggedIn: req.session.token ? true : false
+        }
+
+        const token = jwt.sign({
+            "idx": idx,
+            "device": currentDevice
+        }, process.env.SECRET_KEY, { "expiresIn": "20m" })
         
         req.session.token = token
         result.data.token = token
+        req.session.tokenExpiration = Date.now() + 20 * 60 * 1000 
         res.status(200).send(result)
     }
     catch (err) {
@@ -47,6 +59,7 @@ const logIn = async (req, res, next) => {
 const logOut = async (req, res, next) => {
     try {
         req.session.destroy() 
+        console.log(req.session)
         res.clearCookie('connect.sid')  // 세션 쿠키 삭제
         res.status(200).send()
     }
