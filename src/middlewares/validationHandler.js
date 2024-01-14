@@ -2,7 +2,7 @@ const { validationResult } = require('express-validator')
 
 const validatorErrorChecker = (req, res, next) => {
     const errors = validationResult(req)
-    
+    // console.log(req)
     if (!errors.isEmpty()) {
         const errorMessages = errors.array().map(error => error.msg) || '필수항목을 모두 입력해주세요'
         return res.status(400).json({ errors: errorMessages })

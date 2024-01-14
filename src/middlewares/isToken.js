@@ -47,34 +47,6 @@ const isAdmin = async (req, res, next) => {
     }
     next()
 }
-const haveToken =  async (req, res, next) => {
-    console.log(req.session)
-    if(req.session.token) {
-        const token = req.session.token
-        const err = new Error("이미 로그인 되어있습니다.")
-        return next (err)
-    }
-    next()
-}
-// const haveToken =  async (req, res, next) => {
-//     if(req.session && req.session.token) {
-//         const token = req.session.token
-//         console.log("이미 로그인 되어있습니다.")
-//         const currentUserIdx = getUserIdxFromToken(req.session.token); // 토큰에서 사용자 인덱스 추출
-//             const user = await getUserFromDatabase(currentUserIdx); // 사용자 정보를 데이터베이스에서 가져옴
 
-//             //여기에서 user에는 사용자 정보가 담겨있어야 함
 
-//             if (!user) {
-//                 // 사용자 정보를 찾을 수 없는 경우 로그인 상태를 해제하고 다음 미들웨어로 진행
-//                 req.session.destroy();
-//                 return next();
-//             }
-
-//             // 여기에서 user.devices에는 사용자가 로그인한 기기 목록이 담겨있어야 함
-//             const userDevices = user.devices;
-
-//             next()
-//     }
-// }
-module.exports = { isToken , isAdmin, haveToken}
+module.exports = { isToken , isAdmin }

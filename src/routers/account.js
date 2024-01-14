@@ -1,17 +1,16 @@
 //Import
 const router = require("express").Router()
 const { body } = require("express-validator")
-const { validatorErrorChecker }  = require("../middlewares/validationHandler")
 const isDuplicate = require("../middlewares/isDuplicate")
+const { validatorErrorChecker }  = require("../middlewares/validationHandler")
 const { validateId, validatePw, validateName, validatePhonenumber } = require("../middlewares/checkRegulation")
 const controller = require("../controllers/accountController")
-const { isToken, haveToken } = require("../middlewares/isToken")
+const { isToken } = require("../middlewares/isToken")
 
 //Apis
 //회원가입 & 아이디/이메일 중복체크
 router.post(
     "/",
-    //isNotSession,
     [
         body("id").notEmpty().withMessage("아이디 없음").
         if(body("id").notEmpty()).
@@ -43,8 +42,6 @@ router.post(
 //로그인
 router.post(
     "/login",
-    haveToken,
-    // isNotSession,
     [
         body("id").notEmpty().withMessage("아이디값 없음").
         if(body("id").notEmpty()).
@@ -56,13 +53,6 @@ router.post(
     ],
     validatorErrorChecker,
     controller.logIn
-)
-
-//로그아웃
-router.get(
-    "/logout",
-    isToken,
-    controller.logOut
 )
 
 //내정보 보기

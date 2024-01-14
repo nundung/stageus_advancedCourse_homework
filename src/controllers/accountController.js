@@ -10,6 +10,7 @@ const register = async (req, res, next) => {
         await pool.query(sql, values)
 
         res.status(201).send()
+        //201은 생성완료라는 뜻
     }
     catch (err) {
         next(err)
@@ -27,11 +28,16 @@ const logIn = async (req, res, next) => {
 
         if (data.rowCount === 0) {
             const err = new Error("아이디 또는 비밀번호가 올바르지 않습니다.")
-            err.status = 401         //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다. (인증X)
+            err.status = 401         
+            //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다. (인증X)
             return next(err)
         }
-
         const idx = data.rows[0].idx
+        let isAdmin
+        if(data.rows[0].is_admin === true) {
+        isAdmin = data.rows[0].is_admin
+        }
+        console.log("is_admin : " + isAdmin)
 
         const currentDevice = {
             sessionId: req.sessionID,
@@ -42,27 +48,13 @@ const logIn = async (req, res, next) => {
 
         const token = jwt.sign({
             "idx": idx,
+            "isAdmin": isAdmin,
             "device": currentDevice
         }, process.env.SECRET_KEY, { "expiresIn": "20m" })
         
-        req.session.token = token
         result.data.token = token
         req.session.tokenExpiration = Date.now() + 20 * 60 * 1000 
         res.status(200).send(result)
-    }
-    catch (err) {
-        next(err)
-    }
-}
-
-//로그아웃
-const logOut = async (req, res, next) => {
-    try {
-        req.session.destroy() 
-        res.clearCookie('token')  // 토큰 쿠키 삭제
-        res.clearCookie('connect.sid')  // 세션 쿠키 삭제
-        console.log(req.session)
-        res.status(200).send()
     }
     catch (err) {
         next(err)
@@ -101,11 +93,6 @@ const editInfo = async (req, res, next) => {
     try {
         const authInfo = req.decoded
         console.log(authInfo)
-        // if (!authInfo || !authInfo.id) {
-        //     const err = new Error("로그인X")
-        //     err.status = 401         //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다. (인증X)
-        //     return next(err)
-        // }
 
         const idx = authInfo.idx
         const sql = "UPDATE account SET pw=$1, name=$2, phonenumber=$3, email=$4 WHERE idx=$5"   //물음표 여러개면 $1, $2, $3
@@ -139,4 +126,4 @@ const deleteAccount = async (req, res, next) => {
     }
 }
 
-module.exports = { register, logIn, logOut, info, editInfo, deleteAccount }
+module.exports = { register, logIn, info, editInfo, deleteAccount }

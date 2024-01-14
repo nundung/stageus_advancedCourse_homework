@@ -18,10 +18,20 @@ const validateName = (name) => {
     return nameReg.test(name)
 }
 
+//전화번호 형식
 const validatePhonenumber = (phonenumber) => {
     const phonenumberReg = /^01[0-9]{1}-?[0-9]{3,4}-?[0-9]{4}$/
     return phonenumberReg.test(phonenumber)
 }
+// const validateSort = (sort) => {
+
+// }
+// api
+
+// const filter = (date) => {
+
+// }
+
 
 // exception.emailCheck = (email) => {
 //     var emailReg = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{0,}$/i

@@ -1,6 +1,6 @@
 //Import
 const { logModel } = require("../databases/mongoDb")
-const pool = require("../databases/postgreSql")
+const { pool } = require("../databases/postgreSql")
 
 
 const log = async (req, res, next) => {
@@ -49,24 +49,21 @@ const account = async (req, res, next) => {
     const { sort, startdate, enddate } = req.query
     const result = { "data": null }
     try {
-        let sql = `SELECT * FROM account`
+        const values = []
+        let sql = "SELECT * FROM account"
         if (startdate) {
+            values.push(startdate)
             sql += " WHERE created_at >= $1"
         }
         if (enddate) {
+            values.push(enddate)
             // startdate가 이미 존재하는 경우 AND로 연결
             sql += startdate ? " AND" : " WHERE"
-            sql += " created_at <= $2"
+            sql += ` created_at <= $${values.length}`
         }
         if (sort) {
             sql += ` ORDER BY idx ${sort}`
         }
-
-        console.log(sql)
-        
-        // 시작일과 종료일이 있는 경우에만 바인딩 매개변수 추가
-        const values = startdate || enddate ? [startdate, enddate] : []
-
         const data = await pool.query(sql, values)
 
         if (data.rowCount > 0) {
@@ -87,16 +84,32 @@ const comment = async (req, res, next) => {
     const { sort, startdate, enddate, id, api, postidx } = req.query
     const result = { "data": null }
     try {
-        const sql = `SELECT * FROM account ORDER BY idx ${sort}` 
-        const data = await pool.query(sql)
+        const values = []
+        let sql = "SELECT * FROM comment"
+        if (startdate) {
+            values.push(startdate)
+            sql += " WHERE created_at >= $1"
+        }
+        if (enddate) {
+            values.push(enddate)
+            // startdate가 이미 존재하는 경우 AND로 연결
+            sql += startdate ? " AND" : " WHERE"
+            sql += ` created_at <= $${values.length}`
+        }
+        if (sort) {
+            sql += ` ORDER BY idx ${sort}`
+        }
+
+        const data = await pool.query(sql, values)
 
         if (data.rowCount > 0) {
             result.data = data.rows
             res.status(200).send(result)
         }
+        else {
+        res.status(200).send("댓글 목록이 비어있습니다.")
+        }
 
-        result.data = db
-        res.status(200).send(result)
     }
     catch (err) {
         console.log(err)
