@@ -7,6 +7,7 @@ const session = require("express-session")
 const FileStore = require("session-file-store")(session)
 require('dotenv').config()
 
+
 //Init
 const app = express()   // Express 애플리케이션을 생성하고, 생성된 애플리케이션을 app 변수에 할당한다.
 const port = 8000
@@ -22,9 +23,30 @@ app.use(session({
     //store: mongo.create({ mongoUrl: "db_url" })
 }))
 
+
 //Apis
 const { log } = require("./src/middlewares/log")
 app.use(log)
+
+// const resetRedis = require("./src/configs/redis")
+// app.use(resetRedis)
+//Import
+const schedule = require('node-schedule')
+const redis = require("redis").createClient()
+
+// 스케줄: 매 시간 0분 0초에 updateAndResetRedis 함수 실행
+const resetRedis = schedule.scheduleJob('58 * * * *', async () => {
+    console.log("되나")
+    try {
+        // Redis 초기화
+        await redis.connect()
+        await redis.FLUSHALL()
+        console.log('Redis reset completed.');
+        await redis.disconnect()
+    } catch (err) {
+        console.error('Error updating and resetting Redis:', err.message)
+    }
+})
 
 const countApi = require("./src/routers/visitor")
 app.use("/count", countApi)
@@ -40,6 +62,7 @@ app.use("/comment", commentApi)
 
 const adminApi = require("./src/routers/admin")
 app.use("/admin", adminApi)
+
 
 const { errorHandling } = require("./src/middlewares/errorHandling")
 app.use(errorHandling)

@@ -13,6 +13,13 @@ router.get(
     controller.postList
 )
 
+//게시글 검색
+router.get(
+    "/",
+    isToken,
+
+    
+)
 //게시글 업로드
 router.post(
     "/",

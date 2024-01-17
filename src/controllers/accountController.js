@@ -18,10 +18,11 @@ const register = async (req, res, next) => {
     }
 }
 
+
 //로그인
 const logIn = async (req, res, next) => {
     const { id, pw } = req.body
-    const result = { 
+    const result = {
         "success": false,
         "message": "",
         "data": { "token": "" }}
@@ -58,6 +59,7 @@ const logIn = async (req, res, next) => {
         
         result.data.token = token
         req.session.tokenExpiration = Date.now() + 20 * 60 * 1000 
+        
         await redis.connect()
         console.log(idx)
         await redis.sAdd("visitor", `${idx}`)
