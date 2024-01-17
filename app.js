@@ -26,6 +26,9 @@ app.use(session({
 const { log } = require("./src/middlewares/log")
 app.use(log)
 
+const countApi = require("./src/routers/visitor")
+app.use("/count", countApi)
+
 const accountApi = require("./src/routers/account")
 app.use("/account", accountApi)
 

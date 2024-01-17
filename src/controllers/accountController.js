@@ -1,5 +1,6 @@
 const { pool } = require("../databases/postgreSql")
 const jwt = require("jsonwebtoken")
+const redis = require("redis").createClient()
 
 //회원가입
 const register = async (req, res, next) => {
@@ -20,7 +21,10 @@ const register = async (req, res, next) => {
 //로그인
 const logIn = async (req, res, next) => {
     const { id, pw } = req.body
-    const result = { "data": { "token": "" }}
+    const result = { 
+        "success": false,
+        "message": "",
+        "data": { "token": "" }}
     try {
         const sql = "SELECT * FROM account WHERE id=$1 AND pw=$2"   //물음표 여러개면 $1, $2, $3
         const values = [id, pw]
@@ -37,7 +41,6 @@ const logIn = async (req, res, next) => {
         if(data.rows[0].is_admin === true) {
         isAdmin = data.rows[0].is_admin
         }
-        console.log("is_admin : " + isAdmin)
 
         const currentDevice = {
             sessionId: req.sessionID,
@@ -46,6 +49,7 @@ const logIn = async (req, res, next) => {
             isLoggedIn: req.session.token ? true : false
         }
 
+        console.log("is_admin : " + isAdmin)
         const token = jwt.sign({
             "idx": idx,
             "isAdmin": isAdmin,
@@ -54,6 +58,11 @@ const logIn = async (req, res, next) => {
         
         result.data.token = token
         req.session.tokenExpiration = Date.now() + 20 * 60 * 1000 
+        await redis.connect()
+        console.log(idx)
+        await redis.sAdd("visitor", `${idx}`)
+        await redis.disconnect()
+        result.success = true
         res.status(200).send(result)
     }
     catch (err) {
