@@ -72,14 +72,26 @@ const logIn = async (req, res, next) => {
     }
 }
 
+//로그아웃
+const logOut = async (req, res, next) => {
+    try {
+        req.session.destroy() 
+        res.clearCookie('token')  // 토큰 쿠키 삭제
+        res.clearCookie('connect.sid')  // 세션 쿠키 삭제
+        console.log(req.session)
+        res.status(200).send()
+    }
+    catch (err) {
+        next(err)
+    }
+}
+
 //내정보 보기
 const info = async (req, res, next) => {
     const result = { "data": null }
 
     try {
         const authInfo = req.decoded
-        console.log(authInfo)
-        
         const idx = authInfo.idx
 
         // if (id === null || id === "" || id === undefined) throw new Error("아이디 비어있음")

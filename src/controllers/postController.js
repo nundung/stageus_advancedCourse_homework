@@ -27,6 +27,35 @@ const postList = async (req, res, next) => {
     }
 }
 
+//게시글 검색
+const searchPost = async (req, res, next) => {
+    const { sort, search } = req.query
+    const result = { "data": null }
+    try {
+        const sql = 
+        `SELECT account.id, post.* 
+        FROM post JOIN account 
+        ON post.account_idx = account.idx 
+        WHERE post.title=$1
+        ORDER BY post.idx DESC`
+        // JOIN account ON post.account_idx = account.idx:
+        // post 테이블과 account 테이블을 account_idx와 idx 열을 기준으로 조인. post 테이블의 account_idx와 account 테이블의 idx 값이 일치하는 행을 연결
+        
+        const data = await pool.query(sql)
+        console.log(data)
+        if (data.rowCount > 0) {
+            result.data = data.rows
+            res.status(200).send(result)
+        }
+        else {
+            res.status(200).send("게시글 목록이 비어있습니다.")
+        }
+    }
+    catch (err) {
+        next(err)
+    }
+}
+
 //게시글 업로드
 const uploadPost = async (req, res, next) => {
     const { title, content } = req.body

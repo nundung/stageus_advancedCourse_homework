@@ -1,7 +1,7 @@
 //Import
 const router = require("express").Router()
 const controller = require("../controllers/commentController")
-const { validatorErrorChecker }  = require("../middlewares/validationHandler")
+const { validationHandler }  = require("../middlewares/validationHandler")
 const { check } = require("express-validator")
 const { isToken } = require("../middlewares/isToken")
 
@@ -11,8 +11,8 @@ const { isToken } = require("../middlewares/isToken")
 router.post(
     "/",
     isToken,
-    check("comment").notEmpty().isLength({min: 1, max: 200}),
-    validatorErrorChecker,
+    check("comment").notEmpty().isLength({min: 1, max: 200}).withMessage("댓글은 1~200자"),
+    validationHandler,
     controller.uploadComment
 )
 
@@ -27,8 +27,8 @@ router.get(
 router.put(
     "/:commentidx",
     isToken,
-    check("comment").notEmpty().isLength({min: 1, max: 200}),
-    validatorErrorChecker,
+    check("comment").notEmpty().isLength({min: 1, max: 200}).withMessage("댓글은 1~200자"),
+    validationHandler,
     controller.editComment
 )
 

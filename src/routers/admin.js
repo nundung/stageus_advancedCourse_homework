@@ -1,13 +1,24 @@
 //Import
 const router = require("express").Router()
 const controller = require("../controllers/adminController")
+const { check } = require("express-validator")
 const { isToken, isAdmin } = require("../middlewares/isToken")
+const { validationHandler }  = require("../middlewares/validationHandler")
+const { validateId, validateDate, validateApi } = require("../middlewares/checkRegulation")
+
 
 
 //로그목록 보기
 router.get("/log",
     isToken,
     isAdmin,
+    [
+        check("id").custom((id) => validateId(id)).withMessage("유효하지 않은 아이디형식"),
+        check("startdate").custom((startdate) => validateDate(startdate)).withMessage("유효하지 않은 날짜형식"),
+        check("enddate").custom((enddate) => validateDate(enddate)).withMessage("유효하지 않은 날짜형식"),
+        check("api").custom((api) => validateApi(api)).withMessage("유효하지 않은 api형식")
+    ],
+    validationHandler,
     controller.log
 )
 
@@ -15,6 +26,11 @@ router.get("/log",
 router.get("/account",
     isToken,
     isAdmin,
+    [
+        check("startdate").custom((startdate) => validateDate(startdate)).withMessage("유효하지 않은 날짜형식"),
+        check("enddate").custom((enddate) => validateDate(enddate)).withMessage("유효하지 않은 날짜형식"),
+    ],
+    validationHandler,
     controller.account
 )
 
@@ -22,6 +38,11 @@ router.get("/account",
 router.get("/comment",
     isToken,
     isAdmin,
+    [
+        check("startdate").custom((startdate) => validateDate(startdate)).withMessage("유효하지 않은 날짜형식"),
+        check("enddate").custom((enddate) => validateDate(enddate)).withMessage("유효하지 않은 날짜형식"),
+    ],
+    validationHandler,
     controller.comment
 )
 

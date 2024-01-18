@@ -7,45 +7,58 @@ const isToken = (req, res, next) => {
         "message": "",
     }
     try {
-        if (!authorization || authorization === "") {
-            throw new Error("no token")
+        if (!authorization || authorization.trim() === "") {
+            result.message = "Authorization 헤더가 필요합니다."
+            return res.status(401).send(result);
         }
-        
-        const token = authorization.split(" ")[1];
+
+        const token = authorization.split(" ")[1]
+        //barear token 이라서 분리해줌
+
+        if (!token || token == "{{token}}") {
+            const e = new Error("no token")
+            e.status = 409
+            throw e
+        }
+
         req.decoded = jwt.verify(token, process.env.SECRET_KEY)
         //이 명령어의 반환값이 바로 token에 있는 payload로 변환한 것
         next()
     }
     catch(err) {
         console.log(err.message)
+
         if (err.message === "no token") {
             result.message = "로그인이 필요합니다."
         }
         else if (err.message === "jwt expired") {
-            result.message = "토큰이 만료되었습니다."
+            result.message = "로그인이 만료되었습니다."
         }
         else if (err.message === "invalid token") {
             result.message = "유효하지 않은 토큰"
+        }
+        else if (err.message === "jwt malformed") {
+            result.message = "토큰 형식 잘못 됨"
         }
         res.send(result)
     }
 }
 
 const isAdmin = async (req, res, next) => {
-    const authInfo = req.decoded
-    const idx = authInfo.idx
-    
-    const sql = "SELECT is_admin FROM account WHERE idx=$1"   //물음표 여러개면 $1, $2, $3
-    const values = [idx]
-    const data = await pool.query(sql, values)
+    try {
+        const authInfo = req.decoded
+        const isAdmin = authInfo.isAdmin
 
-    const isAdmin = data.rows[0].is_admin
-    if (isAdmin === false) {
-        const err = new Error("접근 권한이 없습니다.")
-        err.status = 401         //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다. (인증X)
-        next(err)
+        if (isAdmin === false) {
+            const err = new Error("접근 권한이 없습니다.")
+            err.status = 401         //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다. (인증X)
+            next(err)
+        }
+        next()
     }
-    next()
+    catch (err) {
+        next (err)
+    }
 }
 
 

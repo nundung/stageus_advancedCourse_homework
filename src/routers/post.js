@@ -1,7 +1,7 @@
 //Import
 const router = require("express").Router()
 const controller = require("../controllers/postController")
-const { validatorErrorChecker }  = require("../middlewares/validationHandler")
+const { validationHandler }  = require("../middlewares/validationHandler")
 const { check } = require("express-validator")
 const { isToken } = require("../middlewares/isToken")
 
@@ -14,21 +14,25 @@ router.get(
 )
 
 //게시글 검색
-router.get(
-    "/",
-    isToken,
+// router.get(
+//     "/",
+//     isToken,
+//     [
+//         check("title").notEmpty().isLength({ min: 1, max: 100}),
+//     ],
+//     validatorErrorChecker,
+//     controller.searchPost
+// )
 
-    
-)
 //게시글 업로드
 router.post(
     "/",
     isToken,
     [
-        check("title").notEmpty().isLength({ min: 1, max: 100 }),
-        check("content").notEmpty().isLength({ min: 1, max: 1000 }),
+        check("title").notEmpty().isLength({ min: 1, max: 100 }).withMessage("제목은 1~100자"),
+        check("content").notEmpty().isLength({ min: 1, max: 1000 }).withMessage("본문은 1~1000자"),
     ],
-    validatorErrorChecker,
+    validationHandler,
     controller.uploadPost
 )
 
@@ -44,10 +48,10 @@ router.put(
     "/:postidx",
     isToken,
     [
-        check("title").notEmpty().isLength({ min: 1, max: 100 }),
-        check("content").notEmpty().isLength({ min: 1, max: 1000 }),
+        check("title").notEmpty().isLength({ min: 1, max: 100 }).withMessage("제목은 1~100자"),
+        check("content").notEmpty().isLength({ min: 1, max: 1000 }).withMessage("본문은 1~1000자"),
     ],
-    validatorErrorChecker,
+    validationHandler,
     controller.editPost
 )
 

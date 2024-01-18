@@ -9,7 +9,7 @@ require('dotenv').config()
 
 
 //Init
-const app = express()   // Express 애플리케이션을 생성하고, 생성된 애플리케이션을 app 변수에 할당한다.
+const app = express()   // Express 애플리케이s션을 생성하고, 생성된 애플리케이션을 app 변수에 할당한다.
 const port = 8000
 app.use(express.json())   //보낼 json을 자동으로 string으로 변환 / 받은 string을
 
@@ -35,7 +35,9 @@ const schedule = require('node-schedule')
 const redis = require("redis").createClient()
 
 // 스케줄: 매 시간 0분 0초에 updateAndResetRedis 함수 실행
-const resetRedis = schedule.scheduleJob('58 * * * *', async () => {
+// const { resetRedis } = require("./src/configs/redis")
+// app.use(resetRedis)
+const resetRedis = schedule.scheduleJob('57 * * * *', async () => {
     console.log("되나")
     try {
         // Redis 초기화
