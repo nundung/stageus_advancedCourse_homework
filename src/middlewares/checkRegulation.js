@@ -29,11 +29,13 @@ const validatePhonenumber = (phonenumber) => {
 }
 
 //정렬은 desc 혹은 asc
-// const validateSort = (sort) => {
-//     if(sort !== "desc" || sort !== "asc") {
+const validateSort = (sort) => {
+    if(!sort || sort === "desc" || api === "asc") {
+        return true
+    }
+    return false
+}
 
-//     }
-// }
 
 //날짜 형식은 2000-01-01
 const validateDate = (date) => {
@@ -45,18 +47,11 @@ const validateDate = (date) => {
 
 // api
 const validateApi = (api) => {
-    if (!api) {
-        return true
-    }
-    if(api === "account" || api === "post" || api === "comment" || api === "admin" || api === "visitor") {
+    if(!api || api === "account" || api === "post" || api === "comment" || api === "admin" || api === "visitor") {
         return true
     }
     return false
 }
-
-// const filter = (date) => {
-
-// }
 
 
 // exception.emailCheck = (email) => {
@@ -70,6 +65,7 @@ module.exports = {
     validatePw,
     validateName,
     validatePhonenumber,
+    validateSort,
     validateDate,
     validateApi
 }

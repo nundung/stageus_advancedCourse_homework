@@ -13,7 +13,6 @@ const postList = async (req, res, next) => {
         // post 테이블과 account 테이블을 account_idx와 idx 열을 기준으로 조인. post 테이블의 account_idx와 account 테이블의 idx 값이 일치하는 행을 연결
         
         const data = await pool.query(sql)
-        console.log(data)
         if (data.rowCount > 0) {
             result.data = data.rows
             res.status(200).send(result)
@@ -29,20 +28,20 @@ const postList = async (req, res, next) => {
 
 //게시글 검색
 const searchPost = async (req, res, next) => {
-    const { sort, search } = req.query
+    const { title, sort } = req.query
     const result = { "data": null }
     try {
         const sql = 
         `SELECT account.id, post.* 
         FROM post JOIN account 
         ON post.account_idx = account.idx 
-        WHERE post.title=$1
-        ORDER BY post.idx DESC`
+        WHERE post.title ILIKE '%' || $1 || '%'
+        ORDER BY post.idx=$2`
         // JOIN account ON post.account_idx = account.idx:
         // post 테이블과 account 테이블을 account_idx와 idx 열을 기준으로 조인. post 테이블의 account_idx와 account 테이블의 idx 값이 일치하는 행을 연결
         
-        const data = await pool.query(sql)
-        console.log(data)
+        const values = [title, sort]
+        const data = await pool.query(sql, values)
         if (data.rowCount > 0) {
             result.data = data.rows
             res.status(200).send(result)
@@ -137,4 +136,11 @@ const deletePost = async (req, res, next) => {
     }
 }
 
-module.exports = { postList, uploadPost, readPost, editPost, deletePost }
+module.exports = {
+    postList,
+    searchPost,
+    uploadPost,
+    readPost,
+    editPost,
+    deletePost
+}

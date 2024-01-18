@@ -6,24 +6,32 @@ const { check } = require("express-validator")
 const { isToken } = require("../middlewares/isToken")
 
 //Apis
-//게시물 목록(게시판)
+//게시글 목록(게시판)
 router.get(
     "/",
     isToken,
     controller.postList
 )
 
-//게시글 검색
-// router.get(
-//     "/",
-//     isToken,
-//     [
-//         check("title").notEmpty().isLength({ min: 1, max: 100}),
-//     ],
-//     validatorErrorChecker,
-//     controller.searchPost
-// )
 
+//게시글 검색
+router.get(
+    "/search",
+    isToken,
+    [
+        check("title").notEmpty().isLength({ min: 1, max: 100}).withMessage("제목은 1~100자"),
+    ],
+    validationHandler,
+    controller.searchPost
+)
+
+// //최근 검색어 목록
+// router.get(
+//     "/search/recent",
+//     isToken,
+//     validationHandler,
+//     controller.searchList
+// )
 //게시글 업로드
 router.post(
     "/",
