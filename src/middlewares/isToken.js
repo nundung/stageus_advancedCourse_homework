@@ -8,15 +8,16 @@ const isToken = (req, res, next) => {
     }
     try {
         if (!authorization || authorization.trim() === "") {
-            result.message = "Authorization 헤더가 필요합니다."
-            return res.status(401).send(result);
+            const e = new Error("Authorization 헤더가 필요합니다.")
+            e.status = 401
+            throw e
         }
 
         const token = authorization.split(" ")[1]
         //barear token 이라서 분리해줌
 
         if (!token || token == "{{token}}") {
-            const e = new Error("no token")
+            const e = new Error("로그인이 필요합니다.")
             e.status = 409
             throw e
         }
@@ -26,12 +27,7 @@ const isToken = (req, res, next) => {
         next()
     }
     catch(err) {
-        console.log(err.message)
-
-        if (err.message === "no token") {
-            result.message = "로그인이 필요합니다."
-        }
-        else if (err.message === "jwt expired") {
+        if (err.message === "jwt expired") {
             result.message = "로그인이 만료되었습니다."
         }
         else if (err.message === "invalid token") {
@@ -40,9 +36,36 @@ const isToken = (req, res, next) => {
         else if (err.message === "jwt malformed") {
             result.message = "토큰 형식 잘못 됨"
         }
-        res.send(result)
+        next(err)
     }
 }
+
+const isNotToken = (req, res, next) => {
+    const { authorization } = req.headers
+    const result = {
+        "message": "",
+    }
+    try {
+        if (!authorization || authorization.trim() === "") {
+            return next ()
+        }
+
+        const token = authorization.split(" ")[1]
+        //barear token 이라서 분리해줌
+
+        if (!token || token == "{{token}}") {
+            return next ()
+        }
+
+        const e = new Error("이미 로그인 되어있습니다.")
+        e.status = 403
+        throw e
+    }
+    catch(err) {
+        next(err)
+    }
+}
+
 
 const isAdmin = async (req, res, next) => {
     try {
@@ -62,4 +85,4 @@ const isAdmin = async (req, res, next) => {
 }
 
 
-module.exports = { isToken , isAdmin }
+module.exports = { isToken , isNotToken, isAdmin }

@@ -9,7 +9,6 @@ const isSession = (req, res, next) => {
 }
 
 const isNotSession = (req, res, next) => {
-        console.log(req.session)
     if (req.session.user) {
         const err = new Error("이미 로그인 되어있습니다.")
         err.status = 403     //클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않다.

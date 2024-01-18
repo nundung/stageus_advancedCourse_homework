@@ -5,12 +5,13 @@ const isDuplicate = require("../middlewares/isDuplicate")
 const { body } = require("express-validator")
 const { validationHandler }  = require("../middlewares/validationHandler")
 const { validateId, validatePw, validateName, validatePhonenumber } = require("../middlewares/checkRegulation")
-const { isToken } = require("../middlewares/isToken")
+const { isToken, isNotToken } = require("../middlewares/isToken")
 
 //Apis
 //회원가입 & 아이디/이메일 중복체크
 router.post(
     "/",
+    isNotToken,
     [
         body("id").notEmpty().withMessage("아이디 없음").
         if(body("id").notEmpty()).
@@ -45,6 +46,7 @@ router.post(
 //로그인
 router.post(
     "/login",
+    isNotToken,
     [
         body("id").notEmpty().withMessage("아이디값 없음").
         if(body("id").notEmpty()).
@@ -63,7 +65,12 @@ router.post(
 //로그아웃
 router.get(
     "/logout",
-    isToken
+    isToken,
+    (req, res) => {
+        const result = { "messege": "" }
+        result.messege = "로그아웃 됨"
+        res.status(200).send(result)
+    }
 )
 
 //내정보 보기
@@ -97,8 +104,8 @@ router.put(
         isEmail().withMessage("유효하지 않은 이메일")
     ],
     validationHandler,
-    isDuplicate.email,
     isDuplicate.phonenumber,
+    isDuplicate.email,
     controller.editInfo
 )
 

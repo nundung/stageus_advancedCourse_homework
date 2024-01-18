@@ -23,7 +23,6 @@ const register = async (req, res, next) => {
 const logIn = async (req, res, next) => {
     const { id, pw } = req.body
     const result = {
-        "success": false,
         "message": "",
         "data": { "token": "" }}
     try {
@@ -38,10 +37,10 @@ const logIn = async (req, res, next) => {
             return next(err)
         }
         const idx = data.rows[0].idx
-        let isAdmin
-        if(data.rows[0].is_admin === true) {
-        isAdmin = data.rows[0].is_admin
-        }
+        const isAdmin = data.rows[0].is_admin
+        // if(data.rows[0].is_admin === true) {
+        // isAdmin 
+        // }
 
         const currentDevice = {
             sessionId: req.sessionID,
@@ -61,25 +60,9 @@ const logIn = async (req, res, next) => {
         req.session.tokenExpiration = Date.now() + 20 * 60 * 1000 
         
         await redis.connect()
-        console.log(idx)
         await redis.sAdd("visitor", `${idx}`)
         await redis.disconnect()
-        result.success = true
         res.status(200).send(result)
-    }
-    catch (err) {
-        next(err)
-    }
-}
-
-//로그아웃
-const logOut = async (req, res, next) => {
-    try {
-        req.session.destroy() 
-        res.clearCookie('token')  // 토큰 쿠키 삭제
-        res.clearCookie('connect.sid')  // 세션 쿠키 삭제
-        console.log(req.session)
-        res.status(200).send()
     }
     catch (err) {
         next(err)

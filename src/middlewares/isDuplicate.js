@@ -21,43 +21,6 @@ const id = async (req, res, next) => {
     }
 }
 
-//이메일 중복체크
-const email = async (req, res, next) => {
-    const { email } = req.body
-
-    const duplicateCheck = async () => {
-        try {
-            const sql = "SELECT * FROM account WHERE email=$1"
-            const values = [email]
-            const data = await pool.query(sql, values)
-
-            if (data.rows.length > 0) {
-                const e = new Error("이미 사용 중인 이메일입니다.")
-                e.status = 409
-                return next(e)
-            }
-            next()
-        } 
-        catch (err) {
-            next(err)
-        }
-    }
-    try {
-        if (req.session.user) {
-            const currentEmail = req.session.user.email
-            if (email === currentEmail) {
-                return next()
-            } 
-            await duplicateCheck()
-        }
-        else { await duplicateCheck() }
-    }
-    catch (err) {
-        next(err)
-    }
-}
-
-
 //전화번호 중복체크
 const phonenumber = async (req, res, next) => {
     const { phonenumber } = req.body
@@ -81,14 +44,15 @@ const phonenumber = async (req, res, next) => {
     }
     try {
         const authInfo = req.decoded
-        const idx = authInfo.idx
-        
-        const sql = "SELECT phonenumber FROM account WHERE idx=$1"   //물음표 여러개면 $1, $2, $3
-        const values = [idx]
-        const data = await pool.query(sql, values)
+        if(authInfo) {
+            const idx = authInfo.idx
+            
+            const sql = "SELECT phonenumber FROM account WHERE idx=$1"   //물음표 여러개면 $1, $2, $3
+            const values = [idx]
+            const data = await pool.query(sql, values)
 
-        const currentPhonenumber = data.rows[0].phonenumber
-        if(req.session.user) {
+            const currentPhonenumber = data.rows[0].phonenumber
+            console.log(currentPhonesnumber)
             if (phonenumber === currentPhonenumber) {
                 return next()
             } 
@@ -100,5 +64,50 @@ const phonenumber = async (req, res, next) => {
         next(err)
     }
 }
+
+//이메일 중복체크
+const email = async (req, res, next) => {
+    const { email } = req.body
+
+    const duplicateCheck = async () => {
+        try {
+            const sql = "SELECT * FROM account WHERE email=$1"
+            const values = [email]
+            const data = await pool.query(sql, values)
+
+            if (data.rows.length > 0) {
+                const e = new Error("이미 사용 중인 이메일입니다.")
+                e.status = 409
+                return next(e)
+            }
+            next()
+        } 
+        catch (err) {
+            next(err)
+        }
+    }
+    try {
+        const authInfo = req.decoded
+        if (authInfo) {
+            const idx = authInfo.idx
+            
+            const sql = "SELECT email FROM account WHERE idx=$1"   //물음표 여러개면 $1, $2, $3
+            const values = [idx]
+            const data = await pool.query(sql, values)
+
+            const currentEmail = data.rows[0].email
+            if (email === currentEmail) {
+                return next()
+            } 
+            await duplicateCheck()
+        }
+        else { await duplicateCheck() }
+    }
+    catch (err) {
+        next(err)
+    }
+}
+
+
 
 module.exports = { id, email, phonenumber }

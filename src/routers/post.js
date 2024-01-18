@@ -25,13 +25,13 @@ router.get(
     controller.searchPost
 )
 
-// //최근 검색어 목록
-// router.get(
-//     "/search/recent",
-//     isToken,
-//     validationHandler,
-//     controller.searchList
-// )
+//최근 검색어 목록
+router.get(
+    "/search/recent",
+    isToken,
+    controller.searchList
+)
+
 //게시글 업로드
 router.post(
     "/",
