@@ -82,7 +82,7 @@ const searchList = async (req, res, next) => {
     const idx = req.decoded.idx
     try {
         await redis.connect()
-        const searchList = await redis.ZRANGE(`searchList${idx}`, 0, 4)
+        const searchList = await redis.ZREVRANGE(`searchList${idx}`, 0, 1, {REV:true})
         await redis.disconnect()
 
         result.data.searchList = searchList
