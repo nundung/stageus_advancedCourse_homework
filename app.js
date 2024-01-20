@@ -28,20 +28,19 @@ app.use(session({
 const { log } = require("./src/middlewares/log")
 app.use(log)
 
-// const resetRedis = require("./src/configs/redis")
+// const { resetRedis } = require("./src/configs/redis")
 // app.use(resetRedis)
-//Import
+
 const schedule = require('node-schedule')
 const redis = require("redis").createClient()
 
-// 스케줄: 매 시간 0분 0초에 updateAndResetRedis 함수 실행
-// const { resetRedis } = require("./src/configs/redis")
-// app.use(resetRedis)
-const resetRedis = schedule.scheduleJob('57 * * * *', async () => {
-    console.log("되나")
+// const databaseIndexToReset = 1; // 특정 데이터베이스 인덱스
+const resetRedis = schedule.scheduleJob('0 * * * *', async () => {
+    console.log("Redis초기화")
     try {
         // Redis 초기화
         await redis.connect()
+        // await redis.SELECT(databaseIndexToReset);
         await redis.FLUSHALL()
         console.log('Redis reset completed.');
         await redis.disconnect()

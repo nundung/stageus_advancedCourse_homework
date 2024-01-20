@@ -36,6 +36,13 @@ const searchPost = async (req, res, next) => {
     console.log(title)
     const time = new Date
     try {
+        await redis.connect()
+        await redis.zAdd(`searchList${idx}`, {
+            score: time.getTime(),
+            value: title
+        })
+        await redis.disconnect()
+
         const sql = 
         `SELECT account.id, post.* 
         FROM post JOIN account 
@@ -48,13 +55,6 @@ const searchPost = async (req, res, next) => {
         const values = [title, sort]
         const data = await pool.query(sql, values)
 
-        await redis.connect()
-        await redis.zAdd(`searchList${idx}`, {
-            score: time.getTime(),
-            value: title
-        })
-        await redis.disconnect()
-        
         if (data.rowCount > 0) {
             result.data = data.rows
             res.status(200).send(result)
@@ -82,7 +82,7 @@ const searchList = async (req, res, next) => {
     const idx = req.decoded.idx
     try {
         await redis.connect()
-        const searchList = await redis.ZREVRANGE(`searchList${idx}`, 0, 1, {REV:true})
+        const searchList = await redis.ZRANGE(`searchList${idx}`, 0, 1, {REV:true})
         await redis.disconnect()
 
         result.data.searchList = searchList
