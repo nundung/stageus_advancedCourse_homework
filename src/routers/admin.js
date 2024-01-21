@@ -4,7 +4,7 @@ const controller = require("../controllers/adminController")
 const { check } = require("express-validator")
 const { isToken, isAdmin } = require("../middlewares/isToken")
 const { validationHandler }  = require("../middlewares/validationHandler")
-const { validateId, validateDate, validateApi } = require("../middlewares/checkRegulation")
+const { validateSort, validateId, validateDate, validateApi } = require("../middlewares/checkRegulation")
 
 
 
@@ -13,6 +13,7 @@ router.get("/log",
     isToken,
     isAdmin,
     [
+        check("sort").custom((sort) => validateSort(sort)).withMessage("유효하지 않은 정렬형식"),
         check("id").custom((id) => validateId(id)).withMessage("유효하지 않은 아이디형식"),
         check("startdate").custom((startdate) => validateDate(startdate)).withMessage("유효하지 않은 날짜형식"),
         check("enddate").custom((enddate) => validateDate(enddate)).withMessage("유효하지 않은 날짜형식"),
@@ -27,6 +28,7 @@ router.get("/account",
     isToken,
     isAdmin,
     [
+        check("sort").custom((sort) => validateSort(sort)).withMessage("유효하지 않은 정렬형식"),
         check("startdate").custom((startdate) => validateDate(startdate)).withMessage("유효하지 않은 날짜형식"),
         check("enddate").custom((enddate) => validateDate(enddate)).withMessage("유효하지 않은 날짜형식"),
     ],
@@ -39,6 +41,7 @@ router.get("/comment",
     isToken,
     isAdmin,
     [
+        check("sort").custom((sort) => validateSort(sort)).withMessage("유효하지 않은 정렬형식"),
         check("startdate").custom((startdate) => validateDate(startdate)).withMessage("유효하지 않은 날짜형식"),
         check("enddate").custom((enddate) => validateDate(enddate)).withMessage("유효하지 않은 날짜형식"),
     ],

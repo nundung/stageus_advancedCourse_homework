@@ -1,6 +1,7 @@
 //Import
 const router = require("express").Router()
 const controller = require("../controllers/postController")
+const { validateSort } = require("../middlewares/checkRegulation")
 const { validationHandler }  = require("../middlewares/validationHandler")
 const { check } = require("express-validator")
 const { isToken } = require("../middlewares/isToken")
@@ -19,6 +20,7 @@ router.get(
     "/search",
     isToken,
     [
+        check("sort").custom((sort) => validateSort(sort)).withMessage("유효하지 않은 정렬형식"),
         check("title").notEmpty().isLength({ min: 1, max: 100}).withMessage("제목은 1~100자"),
     ],
     validationHandler,

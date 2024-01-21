@@ -38,26 +38,20 @@ const logIn = async (req, res, next) => {
         }
         const idx = data.rows[0].idx
         const isAdmin = data.rows[0].is_admin
-        // if(data.rows[0].is_admin === true) {
-        // isAdmin 
-        // }
 
         const currentDevice = {
             sessionId: req.sessionID,
             userAgent: req.headers['user-agent'],
-            clientIP: req.ip,
-            isLoggedIn: req.session.token ? true : false
+            clientIP: req.ip
         }
 
-        console.log("is_admin : " + isAdmin)
         const token = jwt.sign({
             "idx": idx,
             "isAdmin": isAdmin,
             "device": currentDevice
-        }, process.env.SECRET_KEY, { "expiresIn": "20m" })
+        }, process.env.SECRET_KEY, { "expiresIn": "1h" })
         
         result.data.token = token
-        req.session.tokenExpiration = Date.now() + 20 * 60 * 1000 
         
         await redis.connect()
         await redis.sAdd("visitor", `${idx}`)

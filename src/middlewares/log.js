@@ -5,7 +5,7 @@ const log = async (req, res, next) => {
     // 여기서 logModel을 사용하여 로그를 MongoDB에 저장하는 작업을 수행
     const logData = {
         ip: req.ip,
-        id: req.session.user ? req.session.user.id : 'unknown', 
+        idx: req.decoded ? req.decoded.idx : 'unknown', 
         url: req.originalUrl,
         method: req.method,
         requestedTimestamp: new Date(),

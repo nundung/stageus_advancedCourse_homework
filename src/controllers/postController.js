@@ -47,13 +47,12 @@ const searchPost = async (req, res, next) => {
         `SELECT account.id, post.* 
         FROM post JOIN account 
         ON post.account_idx = account.idx 
-        WHERE post.title ILIKE '%' || $1 || '%'
-        ORDER BY post.idx=$2`
+        WHERE post.title ILIKE '%' || ${title} || '%'
+        ORDER BY post.idx ${sort}`
         // JOIN account ON post.account_idx = account.idx:
         // post 테이블과 account 테이블을 account_idx와 idx 열을 기준으로 조인. post 테이블의 account_idx와 account 테이블의 idx 값이 일치하는 행을 연결
         
-        const values = [title, sort]
-        const data = await pool.query(sql, values)
+        const data = await pool.query(sql)
 
         if (data.rowCount > 0) {
             result.data = data.rows

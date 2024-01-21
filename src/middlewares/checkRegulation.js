@@ -36,7 +36,6 @@ const validateSort = (sort) => {
     return false
 }
 
-
 //날짜 형식은 2000-01-01
 const validateDate = (date) => {
     if (date) {
