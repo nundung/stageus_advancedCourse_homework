@@ -11,8 +11,8 @@ app.use(express.json())   //보낼 json을 자동으로 string으로 변환 / �
 const { log } = require("./src/middlewares/log")
 app.use(log)
 
-const countApi = require("./src/routers/visitor")
-app.use("/count", countApi)
+const visitorApi = require("./src/routers/visitor")
+app.use("/visitor", visitorApi)
 
 const accountApi = require("./src/routers/account")
 app.use("/account", accountApi)

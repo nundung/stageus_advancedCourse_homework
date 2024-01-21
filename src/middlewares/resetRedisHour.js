@@ -2,14 +2,15 @@
 const { pool } = require("../databases/postgreSql")
 const redis = require("redis").createClient()
 
+const VISITOR_HOUR_KEY = process.env.VISITOR_HOUR_KEY
+const redisKey = VISITOR_HOUR_KEY
 
-// const databaseIndexToReset = 1; // 특정 데이터베이스 인덱스
 const resetRedis = ( async (redisKey) => {
-    console.log("Redis초기화")
+    console.log("1시간마다 Redis초기화")
     try {
         // Redis 초기화
         await redis.connect()
-        const visitor = await redis.sCard("visitor")
+        const visitor = await redis.sCard(redisKey)
         await redis.DEL(redisKey)
         console.log(`Redis 키 ${redisKey} 삭제 완료.`)
         await redis.disconnect()
@@ -24,6 +25,5 @@ const resetRedis = ( async (redisKey) => {
     }
 })
 
-const redisKeyToReset = "visitor"
 
-resetRedis(redisKeyToReset)
+resetRedis(redisKey)

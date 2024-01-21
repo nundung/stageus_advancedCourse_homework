@@ -53,9 +53,14 @@ const logIn = async (req, res, next) => {
         
         result.data.token = token
         
+        const VISITOR_HOUR_KEY = process.env.VISITOR_HOUR_KEY
+        const VISITOR_DAY_KEY = process.env.VISITOR_DAY_KEY
+        
         await redis.connect()
-        await redis.sAdd("visitor", `${idx}`)
-        await redis.expire("visitor", 3600);
+        await redis.sAdd(`${VISITOR_HOUR_KEY}`, `${idx}`)
+        await redis.sAdd(`${VISITOR_DAY_KEY}`, `${idx}`)
+        await redis.expire(`${VISITOR_HOUR_KEY}`, 3600)   //1시간
+        await redis.expire(`${VISITOR_DAY_KEY}`, 86400)   //하루
         await redis.disconnect()
         res.status(200).send(result)
     }
