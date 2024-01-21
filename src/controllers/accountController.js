@@ -61,6 +61,7 @@ const logIn = async (req, res, next) => {
         
         await redis.connect()
         await redis.sAdd("visitor", `${idx}`)
+        await redis.expire("visitor", 3600);
         await redis.disconnect()
         res.status(200).send(result)
     }

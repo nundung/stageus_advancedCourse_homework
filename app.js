@@ -1,53 +1,15 @@
 //Import
-//외부모듈을 불러오는 코드
-//require: 다른 자바스크립트파일을 임포트하는 명령어
 const express = require("express")
-const jwt = require("jsonwebtoken")
-const session = require("express-session")
-const FileStore = require("session-file-store")(session)
 require('dotenv').config()
-
 
 //Init
 const app = express()   // Express 애플리케이s션을 생성하고, 생성된 애플리케이션을 app 변수에 할당한다.
 const port = 8000
 app.use(express.json())   //보낼 json을 자동으로 string으로 변환 / 받은 string을
 
-app.use(session({ 
-    secret: process.env.SESSION_SECRET,   // 세션을 암호화, 난수로 만들라고 하셨음
-    resave: false,            // 세션을 항상 저장할지 결정 (false를 권장)     
-    saveUninitialized: false,
-    // 초기화 되지 않은채로 스토어에 저장할지를 결정
-    //세션을 사용하는 데 필요한 정보가 없는 초기 세션은 저장되지 않아 서버의 성능 향상에 도움이 됨
-    store: new FileStore()    // 데이터를 저장하는 형식
-    //store: mongo.create({ mongoUrl: "db_url" })
-}))
-
-
 //Apis
 const { log } = require("./src/middlewares/log")
 app.use(log)
-
-// const { resetRedis } = require("./src/configs/redis")
-// app.use(resetRedis)
-
-const schedule = require('node-schedule')
-const redis = require("redis").createClient()
-
-// const databaseIndexToReset = 1; // 특정 데이터베이스 인덱스
-const resetRedis = schedule.scheduleJob('0 * * * *', async () => {
-    console.log("Redis초기화")
-    try {
-        // Redis 초기화
-        await redis.connect()
-        // await redis.SELECT(databaseIndexToReset);
-        await redis.FLUSHALL()
-        console.log('Redis reset completed.');
-        await redis.disconnect()
-    } catch (err) {
-        console.error('Error updating and resetting Redis:', err.message)
-    }
-})
 
 const countApi = require("./src/routers/visitor")
 app.use("/count", countApi)
