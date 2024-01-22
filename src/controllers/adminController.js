@@ -3,6 +3,7 @@ const { logModel } = require("../databases/mongoDb")
 const { pool } = require("../databases/postgreSql")
 
 
+//로그목록 보기
 const log = async (req, res, next) => {
     const { sort, startdate, enddate, id, api } = req.query
     const result = { "data": null }
@@ -45,6 +46,7 @@ const log = async (req, res, next) => {
 }
 
 
+//유저목록 보기
 const account = async (req, res, next) => {
     const { sort, startdate, enddate } = req.query
     const result = { "data": null }
@@ -80,6 +82,8 @@ const account = async (req, res, next) => {
     }
 }
 
+
+//댓글목록 보기
 const comment = async (req, res, next) => {
     const { sort, startdate, enddate, id, api, postidx } = req.query
     const result = { "data": null }
@@ -117,4 +121,43 @@ const comment = async (req, res, next) => {
     }
 }
 
-module.exports = { log, account, comment }
+
+//방문자수 목록 보기 (1시간)
+const visitorHour = async (req, res, next) => {
+    const result = {
+        "message": "",
+        "data": null
+    }
+    try {
+        const sql = "SELECT * FROM visitor_hour ORDER BY idx DESC"
+        const data = await pool.query(sql)
+        
+        result.data = data.rows
+        console.log(data)
+
+        res.status(200).send(result)
+    }
+    catch (err) {
+        next (err)
+    }
+}
+
+
+//방문자 목록 보기 (하루)
+const visitorDay = async (req, res, next) => {
+    const result = {
+        "message": "",
+        "data": null
+    }
+    try {
+        const sql = "SELECT idx, time FROM visitor_day"
+        const data = await pool.query(sql)
+        
+        result.data = data
+        res.status(200).send(result)
+    }
+    catch (err) {
+        next (err)
+    }
+}
+module.exports = { log, account, comment, visitorHour, visitorDay }

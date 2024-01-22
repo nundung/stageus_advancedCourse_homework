@@ -7,9 +7,9 @@ const { validationHandler }  = require("../middlewares/validationHandler")
 const { validateSort, validateId, validateDate, validateApi } = require("../middlewares/checkRegulation")
 
 
-
 //로그목록 보기
-router.get("/log",
+router.get(
+    "/log",
     isToken,
     isAdmin,
     [
@@ -24,7 +24,8 @@ router.get("/log",
 )
 
 //유저목록 보기
-router.get("/account",
+router.get(
+    "/account",
     isToken,
     isAdmin,
     [
@@ -37,7 +38,8 @@ router.get("/account",
 )
 
 //댓글목록 보기
-router.get("/comment",
+router.get(
+    "/comment",
     isToken,
     isAdmin,
     [
@@ -49,5 +51,20 @@ router.get("/comment",
     controller.comment
 )
 
+//방문자 목록 보기 (1시간)
+router.get(
+    "/hour/list",
+    isToken,
+    isAdmin,
+    controller.visitorHour
+)
+
+//방문자 목록 보기 (하루)
+router.get(
+    "/day/list",
+    isToken,
+    isAdmin,
+    controller.visitorDay
+)
 
 module.exports = router
