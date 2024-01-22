@@ -150,10 +150,10 @@ const visitorDay = async (req, res, next) => {
         "data": null
     }
     try {
-        const sql = "SELECT idx, time FROM visitor_day"
+        const sql = "SELECT * FROM visitor_day ORDER BY idx DESC"
         const data = await pool.query(sql)
         
-        result.data = data
+        result.data = data.rows
         res.status(200).send(result)
     }
     catch (err) {

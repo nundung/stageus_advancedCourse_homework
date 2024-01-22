@@ -1,6 +1,8 @@
 //Import
 const { pool } = require("../databases/postgreSql")
 const redis = require("redis").createClient()
+require('dotenv').config();
+
 
 const VISITOR_DAY_KEY = process.env.VISITOR_DAY_KEY
 const redisKey = VISITOR_DAY_KEY
