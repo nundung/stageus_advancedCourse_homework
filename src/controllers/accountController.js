@@ -61,7 +61,7 @@ const logIn = async (req, res, next) => {
         await redis.sAdd(`${VISITOR_DAY_KEY}`, `${idx}`)
         await redis.expire(`${VISITOR_HOUR_KEY}`, 3600)   //1시간
         await redis.expire(`${VISITOR_DAY_KEY}`, 86400)   //하루
-        await redis.disconnect()
+        await redis.disconnect() 
         res.status(200).send(result)
     }
     catch (err) {

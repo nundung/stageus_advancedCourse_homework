@@ -19,7 +19,7 @@ router.get(
             await redis.connect()
             const visitor = await redis.sCard(`${VISITOR_HOUR_KEY}`)
             await redis.disconnect()
-            
+
             result.data.visitor = visitor
             res.status(200).send(result)
         }

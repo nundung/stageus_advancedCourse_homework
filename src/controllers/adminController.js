@@ -129,7 +129,8 @@ const visitorHour = async (req, res, next) => {
         "data": null
     }
     try {
-        const sql = "SELECT * FROM visitor_hour ORDER BY idx DESC"
+        const VISITOR_HOUR_KEY = process.env.VISITOR_HOUR_KEY
+        const sql = `SELECT * FROM ${VISITOR_HOUR_KEY} ORDER BY idx DESC`
         const data = await pool.query(sql)
         
         result.data = data.rows
@@ -150,7 +151,8 @@ const visitorDay = async (req, res, next) => {
         "data": null
     }
     try {
-        const sql = "SELECT * FROM visitor_day ORDER BY idx DESC"
+        const VISITOR_DAY_KEY = process.env.VISITOR_DAY_KEY
+        const sql = `SELECT * FROM ${VISITOR_DAY_KEY} ORDER BY idx DESC`
         const data = await pool.query(sql)
         
         result.data = data.rows
