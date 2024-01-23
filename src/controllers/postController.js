@@ -111,6 +111,32 @@ const uploadPost = async (req, res, next) => {
     }
 }
 
+//이미지 업로드 (S3)
+const uploadImageS3 = async (req, res, next) => {
+    const {image} = req.body
+    try {
+        const authInfo = req.decoded
+        const idx = authInfo.idx
+    }
+}
+//이미지 업로드 (서버)
+const uploadImageServer = async (req, res, next) => {
+    const { title, content } = req.body
+    try {
+        const authInfo = req.decoded
+        const idx = authInfo.idx
+
+        const sql = "INSERT INTO post(account_idx, title, content) VALUES ($1, $2, $3)"
+        const values = [idx, title, content]
+        await pool.query(sql, values)
+
+        res.status(200).send()
+    }
+    catch (err) {
+        next(err)
+    }
+}
+
 //게시글 보기
 const readPost = async (req, res, next) => {
     const postIdx = req.params.postidx

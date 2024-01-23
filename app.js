@@ -35,6 +35,7 @@ app.use(errorHandling)
 app.listen(port, () => {
     console.log(`${port}번에서 HTTP 웹서버 실행`)
 })
+
 //콜백함수
 //이 메소드는 애플리케이션이 특정 포트에서 들어오는 HTTP 요청을 수신할 수 있도록 서버를 시작
 //Express 웹 서버를 지정된 포트에서 실행하고, 서버가 시작될 때 콘솔에 메시지를 출력하는 역할
