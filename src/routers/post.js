@@ -14,7 +14,6 @@ router.get(
     controller.postList
 )
 
-
 //게시글 검색
 router.get(
     "/search",
@@ -45,6 +44,23 @@ router.post(
     validationHandler,
     controller.uploadPost
 )
+
+const uploadImageServer = async (req, res, next) => {
+    const { title, content } = req.body
+    try {
+        const authInfo = req.decoded
+        const idx = authInfo.idx
+
+        const sql = "INSERT INTO post(account_idx, title, content) VALUES ($1, $2, $3)"
+        const values = [idx, title, content]
+        await pool.query(sql, values)
+
+        res.status(200).send()
+    }
+    catch (err) {
+        next(err)
+    }
+}
 
 //게시글 보기
 router.get(

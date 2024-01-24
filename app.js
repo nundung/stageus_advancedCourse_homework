@@ -18,7 +18,10 @@ const accountApi = require("./src/routers/account")
 app.use("/account", accountApi)
 
 const postApi = require("./src/routers/post")
-app.use("/post", postApi, )
+app.use("/post", postApi)
+
+const imageApi = require("./src/routers/image")
+app.use("/image", imageApi)
 
 const commentApi = require("./src/routers/comment")
 app.use("/comment", commentApi)
