@@ -162,4 +162,5 @@ const visitorDay = async (req, res, next) => {
         next (err)
     }
 }
+
 module.exports = { log, account, comment, visitorHour, visitorDay }

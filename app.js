@@ -1,8 +1,20 @@
 //Import
 const express = require("express")
 require('dotenv').config()
+const AWS = require('aws-sdk')
 
-//Init
+// aws region 및 자격증명 설정
+// AWS.config.update({
+//     accessKeyId: process.env.S3_ACCESS_KEY_ID,
+//     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+//     region: 'ap-northeast-2',
+// })
+
+// const s3 = new AWS.S3()
+// s3.listBuckets().promise().then((data) => {
+// console.log('S3 : ', JSON.stringify(data, null, 2))
+// })
+
 const app = express()   // Express 애플리케이s션을 생성하고, 생성된 애플리케이션을 app 변수에 할당한다.
 const port = 8000
 app.use(express.json())   //보낼 json을 자동으로 string으로 변환 / 받은 string을

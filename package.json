@@ -2,6 +2,7 @@
   "dependencies": {
     "@adminjs/express": "^6.1.0",
     "adminjs": "^7.5.2",
+    "aws-sdk": "^2.1545.0",
     "connect-mongo": "^5.1.0",
     "cron": "^3.1.6",
     "dotenv": "^16.3.1",
@@ -12,7 +13,9 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.1.0",
     "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
     "node-schedule": "^2.1.1",
+    "path": "^0.12.7",
     "pg": "^8.11.3",
     "redis": "^4.6.12",
     "session-file-store": "^1.5.0"
