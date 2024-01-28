@@ -1,13 +1,7 @@
 //Import
 const express = require("express")
-const multer = require("multer")
-const multerS3 = require("multer-s3")
 require("dotenv").config()
-
-const s3 = new AWS.S3()
-// s3.listBuckets().promise().then((data) => {
-// console.log('S3 : ', JSON.stringify(data, null, 2))
-// })
+const awsConfig = require("./src/configs/awsConfig")
 
 const app = express()   // Express 애플리케이s션을 생성하고, 생성된 애플리케이션을 app 변수에 할당한다.
 const port = 8000
@@ -34,7 +28,6 @@ app.use("/comment", commentApi)
 
 const adminApi = require("./src/routers/admin")
 app.use("/admin", adminApi)
-
 
 const { errorHandling } = require("./src/middlewares/errorHandling")
 app.use(errorHandling)
