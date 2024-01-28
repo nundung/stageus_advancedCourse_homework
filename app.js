@@ -1,16 +1,10 @@
 //Import
 const express = require("express")
-require('dotenv').config()
-const AWS = require('aws-sdk')
+const multer = require("multer")
+const multerS3 = require("multer-s3")
+require("dotenv").config()
 
-// aws region 및 자격증명 설정
-// AWS.config.update({
-//     accessKeyId: process.env.S3_ACCESS_KEY_ID,
-//     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-//     region: 'ap-northeast-2',
-// })
-
-// const s3 = new AWS.S3()
+const s3 = new AWS.S3()
 // s3.listBuckets().promise().then((data) => {
 // console.log('S3 : ', JSON.stringify(data, null, 2))
 // })

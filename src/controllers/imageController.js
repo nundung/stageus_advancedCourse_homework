@@ -35,13 +35,15 @@ const viewImageServer = (req, res, next) => {
     try {
         const file = req.params.file;
         const imagePath = path.join(__dirname, "../../../uploads/", file);
+        console.log("Image Path:", imagePath);
 
         const directoryPath = path.join(__dirname, "../../../uploads/");
+        console.log("Directory Path:", directoryPath);
 
         console.log(file)
         fs.readdir(directoryPath, (err, files) => {
             if (err) {
-                throw err;
+                throw err
             }
 
             console.log("Files in directory:", files);

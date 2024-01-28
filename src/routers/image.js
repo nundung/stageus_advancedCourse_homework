@@ -3,8 +3,9 @@ const router = require("express").Router()
 const controller = require("../controllers/imageController")
 const { isToken } = require("../middlewares/isToken")
 const multer = require("multer")
+const multerS3 = require("multer-s3")
+const AWS = require("aws-sdk")
 const path = require("path")
-var S3 = require('aws-sdk/clients/s3')
 
 const upload = multer({
     dest: path.join(__dirname, "../../../uploads/")
