@@ -2,7 +2,7 @@
 const router = require("express").Router()
 const controller = require("../controllers/imageController")
 const { isToken } = require("../middlewares/isToken")
-const { check } = require("express-validator")
+const { check, body } = require("express-validator")
 const { validationHandler }  = require("../middlewares/validationHandler")
 
 
@@ -10,7 +10,7 @@ const { validationHandler }  = require("../middlewares/validationHandler")
 router.post(
     "/server",
     isToken,
-    check("file").notEmpty().withMessage("이미지 파일 없음"),
+    body("file").notEmpty().withMessage("이미지 파일 없음"),
     validationHandler,
     controller.uploadImageServer
 )

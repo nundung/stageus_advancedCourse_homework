@@ -14,19 +14,20 @@ router.post(
     isNotToken,
     [
         body("id").notEmpty().withMessage("아이디 없음").
+        //아이디 값이 비어있지 않을 경우에만 다음 유효성 검사를 실행
         if(body("id").notEmpty()).
         isLength({ min: 6, max: 18 }).withMessage("아이디는 6~18자").
-        custom((id) => validateId(id)).withMessage("유효하지 않은 아이디"),
+        custom((id) => validateId(id)).withMessage("유효하지 않은 아이디형식"),
 
         body("pw").notEmpty().withMessage("비밀번호 없음").
         if(body("pw").notEmpty()).
         isLength({ min: 8, max: 20 }).withMessage("비밀번호는 8~20자").
-        custom((pw) => validatePw(pw)).withMessage("유효하지 않은 비밀번호"),
+        custom((pw) => validatePw(pw)).withMessage("유효하지 않은 비밀번호형식"),
 
         body("name").notEmpty().withMessage("이름 없음").
         if(body("name").notEmpty()).
         isLength({ min: 2, max: 10 }).withMessage("이름은 2~10자").
-        custom((name) => validateName(name)).withMessage("유효하지 않은 이름"),
+        custom((name) => validateName(name)).withMessage("유효하지 않은 이름형식"),
 
         body("phonenumber").notEmpty().withMessage("전화번호 없음").
         if(body("phonenumber").notEmpty()).
