@@ -3,7 +3,6 @@ const AWS = require("aws-sdk")
 const path = require("path")
 const multer = require("multer")
 const multerS3 = require("multer-s3")
-const S3 = new AWS.S3()
 
 
 //aws region 및 자격증명 설정
@@ -17,6 +16,7 @@ const uploadServer = multer({
     dest: path.join(__dirname, "../../../uploads/")
 })
 
+const S3 = new AWS.S3()
 const uploadS3 = multer({
     storage: multerS3({
         s3: S3,

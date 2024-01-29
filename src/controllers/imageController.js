@@ -1,7 +1,7 @@
 const path = require("path")
 const fs = require("fs")
 const { S3 } = require("../configs/awsConfig")
-const { uploadServer, uploadS3 } = require("../middlewares/uploadImage")
+const { uploadServer, uploadS3 } = require("../configs/awsConfig")
 
 //이미지 업로드 (서버)
 const uploadImageServer = (req, res, next) => {
