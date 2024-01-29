@@ -4,24 +4,22 @@ const controller = require("../controllers/imageController")
 const { isToken } = require("../middlewares/isToken")
 const { check, body } = require("express-validator")
 const { validationHandler }  = require("../middlewares/validationHandler")
-
+const { S3, uploadServer, uploadS3} = require("../configs/awsConfig")
 
 //이미지 업로드 (서버)
 router.post(
     "/server",
     isToken,
-    body("file").notEmpty().withMessage("이미지 파일 없음"),
-    validationHandler,
-    controller.uploadImageServer
+    uploadServer.single("file"),
+    controller.uploadImageS3
 )
 
 //이미지 업로드 (S3)
 router.post(
     "/s3",
     isToken,
-    check("file").notEmpty().withMessage("이미지 파일 없음"),
-    validationHandler,
-    controller.uploadImageS3
+    uploadS3.single("file"),
+    controller.uploadImageServer
 )
 
 //이미지 보기 (서버)

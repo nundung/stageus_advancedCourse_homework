@@ -1,12 +1,10 @@
 const path = require("path")
 const fs = require("fs")
-const { S3 } = require("../configs/awsConfig")
-const { uploadServer, uploadS3 } = require("../configs/awsConfig")
+const { S3, uploadServer, uploadS3} = require("../configs/awsConfig")
 
 //이미지 업로드 (서버)
 const uploadImageServer = (req, res, next) => {
     try {
-        uploadServer.single("file"),
         res.status(200).send("파일 업로드 완료")
     }
     catch (err) {
@@ -17,7 +15,6 @@ const uploadImageServer = (req, res, next) => {
 //이미지 업로드 (S3)
 const uploadImageS3 = (req, res, next) => {
     try {
-        uploadS3.single("file"),
         res.status(200).send("파일 업로드 완료")
     }
     catch (err) {

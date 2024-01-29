@@ -6,6 +6,7 @@ const fs = require('fs')
 
 try {
 	fs.readdirSync('uploads') // 폴더 확인
+    console.log("실행")
 } catch(err) {
 	console.error('uploads 폴더가 없습니다..')
 }
@@ -20,21 +21,25 @@ AWS.config.update({
 const uploadServer = multer({
     storage: multer.diskStorage({
         destination(req, file, done) {
-            done(null, 'uploads/')   // 파일 저장 경로를 설정
+            const uploadpath = path.join(process.cwd(), "../uploads")
+            done(null, uploadpath)
         },
         filename(req, file, done) { // 파일명을 어떤 이름으로 올릴지
             const ext = path.extname(file.originalname); // 파일의 확장자
             done(null, path.basename(file.originalname, ext) + Date.now() + ext); // 파일이름 + 날짜 + 확장자 이름으로 저장
         }
     })
-    //서버의 디렉토리에 파일 저장
 })
 
 const S3 = new AWS.S3()
 const uploadS3 = multer({
     storage: multerS3({
         s3: S3,
-        bucket: process.env.S3_BUCKET_NAME
+        bucket: process.env.S3_BUCKET_NAME,
+        filename(req, file, done) { // 파일명을 어떤 이름으로 올릴지
+            const ext = path.extname(file.originalname); // 파일의 확장자
+            done(null, path.basename(file.originalname, ext) + Date.now() + ext); // 파일이름 + 날짜 + 확장자 이름으로 저장
+        }
     })
 })
 
