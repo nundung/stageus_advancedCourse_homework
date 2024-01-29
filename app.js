@@ -1,7 +1,6 @@
 //Import
 const express = require("express")
 require("dotenv").config()
-const awsConfig = require("./src/configs/awsConfig")
 
 const app = express()   // Express 애플리케이s션을 생성하고, 생성된 애플리케이션을 app 변수에 할당한다.
 const port = 8000

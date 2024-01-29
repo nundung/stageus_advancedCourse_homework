@@ -1,17 +1,12 @@
 const path = require("path")
 const fs = require("fs")
-const AWS = require("aws-sdk")
-const s3 = new AWS.S3()
+const { S3 } = require("../configs/awsConfig")
+const { uploadServer, uploadS3 } = require("../middlewares/uploadImage")
 
 //이미지 업로드 (서버)
-const uploadImageServer = async (req, res, next) => {
+const uploadImageServer = (req, res, next) => {
     try {
-        const image = req.file
-        if(!image) {
-            const err = new Error("파일이 존재하지 않습니다.")
-            err.status = 500
-            return next(err)
-        }
+        uploadServer.single("file"),
         res.status(200).send("파일 업로드 완료")
     }
     catch (err) {
@@ -20,14 +15,9 @@ const uploadImageServer = async (req, res, next) => {
 }
 
 //이미지 업로드 (S3)
-const uploadImageS3 = async (req, res, next) => {
+const uploadImageS3 = (req, res, next) => {
     try {
-        const image = req.file
-        if(!image) {
-            const err = new Error("파일이 존재하지 않습니다.")
-            err.status = 500
-            return next(err)
-        }
+        uploadS3.single("file"),
         res.status(200).send("파일 업로드 완료")
     }
     catch (err) {
@@ -60,7 +50,7 @@ const viewImageS3 = (req, res, next) => {
 
         // S3에서 이미지 다운로드
         const params = { Bucket: "nundung", Key: file }
-        s3.getObject(params, (err, data) => {
+        S3.getObject(params, (err, data) => {
             if (err) {
                 console.error("Error loading image from S3:", err);
                 return next(err);

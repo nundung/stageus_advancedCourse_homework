@@ -2,28 +2,16 @@
 const router = require("express").Router()
 const controller = require("../controllers/imageController")
 const { isToken } = require("../middlewares/isToken")
-const path = require("path")
-const multer = require("multer")
-const multerS3 = require("multer-s3")
-const AWS = require("aws-sdk")
-const s3 = new AWS.S3()
+const { check } = require("express-validator")
+const { validationHandler }  = require("../middlewares/validationHandler")
 
-const uploadServer = multer({
-    dest: path.join(__dirname, "../../../uploads/")
-})
-
-const uploadS3 = multer({
-    storage: multerS3({
-        s3: s3,
-        bucket: "nundung"
-    })
-})
 
 //이미지 업로드 (서버)
 router.post(
     "/server",
     isToken,
-    uploadServer.single("file"),
+    check("file").notEmpty().withMessage("이미지 파일 없음"),
+    validationHandler,
     controller.uploadImageServer
 )
 
@@ -31,7 +19,8 @@ router.post(
 router.post(
     "/s3",
     isToken,
-    uploadS3.single("file"),
+    check("file").notEmpty().withMessage("이미지 파일 없음"),
+    validationHandler,
     controller.uploadImageS3
 )
 
@@ -39,6 +28,8 @@ router.post(
 router.get(
     "/server/:file",
     isToken,
+    check("file").notEmpty().withMessage("이미지 파일 없음"),
+    validationHandler,
     controller.viewImageServer
 )
 
@@ -46,6 +37,8 @@ router.get(
 router.get(
     "/s3/:file",
     isToken,
+    check("file").notEmpty().withMessage("이미지 파일 없음"),
+    validationHandler,
     controller.viewImageS3
 )
 
