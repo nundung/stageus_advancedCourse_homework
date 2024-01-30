@@ -28,7 +28,7 @@ const uploadServer = multer({
         filename(req, file, done) {   // 파일명을 어떤 이름으로 올릴지
             const ext = path.extname(file.originalname)  // 파일의 확장자
             console.log(file.originalname)
-            done(null, path.basename(file.originalname, ext) + Date.now() + ext)  // 파일이름 + 날짜 + 확장자 이름으로 저장
+            done(null, `${Date.now()}_${path.basename(file.originalname)}`)  // 파일이름 + 날짜 + 확장자 이름으로 저장
         }
     })
 })
@@ -49,7 +49,8 @@ const uploadS3 = multer({
      limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-        // acl: "public-read",
+//null, `${Date.now()}_${path.basename(file.originalname)}`
+// acl: "public-read",
 //         filename(req, file, done) { 
 //             console.log(file.originalname);
 //             done(null, path.basename(file.originalname, ext) + Date.now() + ext);
