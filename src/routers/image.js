@@ -4,14 +4,14 @@ const controller = require("../controllers/imageController")
 const { isToken } = require("../middlewares/isToken")
 const { check, body } = require("express-validator")
 const { validationHandler }  = require("../middlewares/validationHandler")
-const { S3, uploadServer, uploadS3} = require("../configs/awsConfig")
+const { uploadServer, uploadS3 } = require("../configs/awsConfig")
 
 //이미지 업로드 (서버)
 router.post(
     "/server",
     isToken,
     uploadServer.single("file"),
-    controller.uploadImageS3
+    controller.uploadImage
 )
 
 //이미지 업로드 (S3)
@@ -19,7 +19,7 @@ router.post(
     "/s3",
     isToken,
     uploadS3.single("file"),
-    controller.uploadImageServer
+    controller.uploadImage
 )
 
 //이미지 보기 (서버)
