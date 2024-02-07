@@ -5,6 +5,7 @@ require("dotenv").config()
 const app = express()   // Express 애플리케이s션을 생성하고, 생성된 애플리케이션을 app 변수에 할당한다.
 const port = 8000
 app.use(express.json())   //보낼 json을 자동으로 string으로 변환 / 받은 string을
+app.use(express.urlencoded({ extended: true }))
 
 //Apis
 const { log } = require("./src/middlewares/log")

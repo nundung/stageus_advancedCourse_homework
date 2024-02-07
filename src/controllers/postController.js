@@ -93,18 +93,37 @@ const searchList = async (req, res, next) => {
     }
 }
 
+
 //게시글 업로드
 const uploadPost = async (req, res, next) => {
     const { title, content } = req.body
     try {
+        const fileInfos = req.files.map(file => {
+        return {
+            originalname: file.originalname,
+            encoding: file.encoding,
+            mimetype: file.mimetype,
+            size: file.size,
+            location: file.location // 이미지 경로
+        };
+    });
+
+        console.log(fileInfos);
+        res.send(fileInfos);
+        console.log(req.files)
         const authInfo = req.decoded
         const idx = authInfo.idx
+        const imagePath = `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${req.files.key}`;
 
-        const sql = "INSERT INTO post(account_idx, title, content) VALUES ($1, $2, $3)"
-        const values = [idx, title, content]
-        await pool.query(sql, values)
+        const postSql = "INSERT INTO post(account_idx, title, content) VALUES ($1, $2, $3) RETURNING idx;"
+        const postValues = [idx, title, content]
+        const postResult = await pool.query(postSql, postValues)
 
-        res.status(200).send()
+        const imageSql = "INSERT INTO image(post_idx, path, created_at) VALUES ($1, $2, $3)"
+        const imageValues = [postResult.rows[0].idx, imagePath, new Date()];
+        await pool.query(imageSql, imageValues);
+        
+        res.json({ imagePath });
     }
     catch (err) {
         next(err)
@@ -117,9 +136,10 @@ const readPost = async (req, res, next) => {
     const result = { "data": null }
     try {
         const sql = 
-        `SELECT account.id, post.*
-        FROM post JOIN account 
-        ON post.account_idx = account.idx
+        `SELECT account.id, image.path, post.*
+        FROM post
+        JOIN account ON post.account_idx = account.idx
+        LEFT JOIN image ON post.idx = image.post_idx
         WHERE post.idx=$1`
         const values = [postIdx]
         const data = await pool.query(sql, values)
