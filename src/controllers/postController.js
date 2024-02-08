@@ -6,9 +6,11 @@ const postList = async (req, res, next) => {
     const result = { "data": null }
     try {
         const sql = 
-        `SELECT account.id, post.* 
-        FROM post JOIN account 
-        ON post.account_idx = account.idx 
+        `SELECT account.id, post.*, COUNT(image.idx) AS image_count
+        FROM post 
+        JOIN account ON post.account_idx = account.idx 
+        LEFT JOIN image ON post.idx = image.post_idx
+        GROUP BY account.id, post.idx
         ORDER BY post.idx DESC`
         // JOIN account ON post.account_idx = account.idx:
         // post 테이블과 account 테이블을 account_idx와 idx 열을 기준으로 조인. post 테이블의 account_idx와 account 테이블의 idx 값이 일치하는 행을 연결
@@ -44,10 +46,12 @@ const searchPost = async (req, res, next) => {
         await redis.disconnect()
 
         const sql = 
-        `SELECT account.id, post.* 
-        FROM post JOIN account 
-        ON post.account_idx = account.idx 
+        `SELECT account.id, post.*, COUNT(image.idx) AS image_count
+        FROM post 
+        JOIN account ON post.account_idx = account.idx 
+        LEFT JOIN image ON post.idx = image.post_idx
         WHERE post.title ILIKE '%' || ${title} || '%'
+        GROUP BY account.id, post.idx
         ORDER BY post.idx ${sort}`
         // JOIN account ON post.account_idx = account.idx:
         // post 테이블과 account 테이블을 account_idx와 idx 열을 기준으로 조인. post 테이블의 account_idx와 account 테이블의 idx 값이 일치하는 행을 연결
@@ -98,18 +102,21 @@ const searchList = async (req, res, next) => {
 const uploadPost = async (req, res, next) => {
     const { title, content } = req.body
     try {
-
         const authInfo = req.decoded
         const idx = authInfo.idx
         // const imagePath = `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${req.files.key}`;
 
-        const postSql = "INSERT INTO post(account_idx, title, content) VALUES ($1, $2, $3) RETURNING idx;"
+        const postSql = 
+        `INSERT INTO post(account_idx, title, content) 
+        VALUES ($1, $2, $3) RETURNING idx;`
         const postValues = [idx, title, content]
         const postResult = await pool.query(postSql, postValues)
 
         const fileInfos = req.files.map(file => {
-            const imageSql = "INSERT INTO image(post_idx, path, created_at) VALUES ($1, $2, $3)"
-            const imageValues = [postResult.rows[0].idx, file.location, new Date()]
+            const imageSql = 
+            `INSERT INTO image(post_idx, account_idx, path, created_at)
+            VALUES ($1, $2, $3, $4)`
+            const imageValues = [postResult.rows[0].idx, idx, file.location, new Date()]
             pool.query(imageSql, imageValues)
             return {
                 originalname: file.originalname,
@@ -147,9 +154,9 @@ const readPost = async (req, res, next) => {
         }
 
         const imageSql = 
-        `SELECT image.path
+        `SELECT path
         FROM image
-        WHERE image.post_idx = $1`
+        WHERE post_idx = $1`
         const imageValues = [postIdx]
         const imageData = await pool.query(imageSql, imageValues)
 
@@ -171,10 +178,24 @@ const editPost = async (req, res, next) => {
         const authInfo = req.decoded
         const idx = authInfo.idx
 
-        const sql = "UPDATE post SET title=$1, content=$2 WHERE idx=$3 AND account_idx=$4"
-        const values = [title, content, postIdx, idx]
-        await pool.query(sql, values)
+        const postSql = 
+        `UPDATE post 
+        SET title=$1, content=$2 
+        WHERE idx=$3 AND account_idx=$4`
+        const postValues = [title, content, postIdx, idx]
+        await pool.query(postSql, postValues)
 
+        const imageSql = 
+        `SELECT image.path
+        FROM image
+        WHERE image.post_idx=$1`
+        const imageValues = [postIdx]
+        const imageData = await pool.query(imageSql, imageValues)
+
+        const postInfo = postData.rows[0]
+        postInfo.images = imageData.rows
+        result.data = postInfo
+        res.status(200).send(result)
         res.status(200).send()
     }
     catch (err) {
@@ -189,11 +210,19 @@ const deletePost = async (req, res, next) => {
         const authInfo = req.decoded
         const idx = authInfo.idx
 
-        const sql = "DELETE FROM post WHERE idx=$1 AND account_idx=$2"
-        const values = [postIdx, idx]
-        await pool.query(sql, values) 
+        const imageSql = 
+        `DELETE FROM image
+        WHERE image.post_idx=$1 AND account_idx=$2`
+        const imageValues = [postIdx, idx]
+        await pool.query(imageSql, imageValues)
 
-        res.status(200).send()
+        const postSql = 
+        `DELETE FROM post 
+        WHERE idx=$1 AND account_idx=$2`
+        const postValues = [postIdx, idx]
+        await pool.query(postSql, postValues) 
+
+        res.status(200).send("게시물이 삭제되었습니다.")
     }
     catch (err) {
         next (err)
