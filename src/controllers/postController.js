@@ -98,32 +98,29 @@ const searchList = async (req, res, next) => {
 const uploadPost = async (req, res, next) => {
     const { title, content } = req.body
     try {
-        const fileInfos = req.files.map(file => {
-        return {
-            originalname: file.originalname,
-            encoding: file.encoding,
-            mimetype: file.mimetype,
-            size: file.size,
-            location: file.location // 이미지 경로
-        };
-    });
 
-        console.log(fileInfos);
-        res.send(fileInfos);
-        console.log(req.files)
         const authInfo = req.decoded
         const idx = authInfo.idx
-        const imagePath = `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${req.files.key}`;
+        // const imagePath = `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${req.files.key}`;
 
         const postSql = "INSERT INTO post(account_idx, title, content) VALUES ($1, $2, $3) RETURNING idx;"
         const postValues = [idx, title, content]
         const postResult = await pool.query(postSql, postValues)
 
-        const imageSql = "INSERT INTO image(post_idx, path, created_at) VALUES ($1, $2, $3)"
-        const imageValues = [postResult.rows[0].idx, imagePath, new Date()];
-        await pool.query(imageSql, imageValues);
-        
-        res.json({ imagePath });
+        const fileInfos = req.files.map(file => {
+            const imageSql = "INSERT INTO image(post_idx, path, created_at) VALUES ($1, $2, $3)"
+            const imageValues = [postResult.rows[0].idx, file.location, new Date()]
+            pool.query(imageSql, imageValues)
+            return {
+                originalname: file.originalname,
+                encoding: file.encoding,
+                mimetype: file.mimetype,
+                size: file.size,
+                location: file.location // 이미지 경로
+            }
+        })
+        res.status(200).send()
+        // res.json({ imagePath })
     }
     catch (err) {
         next(err)
@@ -135,21 +132,30 @@ const readPost = async (req, res, next) => {
     const postIdx = req.params.postidx
     const result = { "data": null }
     try {
-        const sql = 
-        `SELECT account.id, image.path, post.*
+        const postSql = 
+        `SELECT account.id, post.*
         FROM post
         JOIN account ON post.account_idx = account.idx
-        LEFT JOIN image ON post.idx = image.post_idx
         WHERE post.idx=$1`
-        const values = [postIdx]
-        const data = await pool.query(sql, values)
+        const postValues = [postIdx]
+        const postData = await pool.query(postSql, postValues)
 
-        if (data.rowCount === 0) {
+        if (postData.rowCount === 0) {
             const e = new Error("게시글을 찾을 수 없습니다.")
             e.status = 500      
             throw e
         }
-        result.data = data.rows
+
+        const imageSql = 
+        `SELECT image.path
+        FROM image
+        WHERE image.post_idx = $1`
+        const imageValues = [postIdx]
+        const imageData = await pool.query(imageSql, imageValues)
+
+        const postInfo = postData.rows[0]
+        postInfo.images = imageData.rows
+        result.data = postInfo
         res.status(200).send(result)
     }
     catch (err) {
